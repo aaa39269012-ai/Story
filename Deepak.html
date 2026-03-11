@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Kahani Play — Admin</title>
+  <style>
+    :root{
+      --bg0:#070a0f;
+      --bg1:#0b1220;
+      --card: rgba(255,255,255,.05);
+      --line: rgba(148,163,184,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(148,163,184,.85);
+      --blue:#1e78ff;
+      --green:#22c55e;
+      --red:#ef4444;
+      --r:18px;
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 600px at 20% 0%, rgba(30,120,255,.18) 0%, rgba(30,120,255,0) 55%),
+        radial-gradient(800px 600px at 90% 20%, rgba(34,197,94,.12) 0%, rgba(34,197,94,0) 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
+    a{ color:inherit; text-decoration:none; }
+    button,input{ font:inherit; }
+
+    /* Appbar */
+    .appbar{
+      position: sticky;
+      top:0;
+      z-index:30;
+      padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+      background: rgba(8,10,14,.62);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .barRow{ display:flex; gap:10px; align-items:center; }
+    .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .logo{
+      width:34px;height:34px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(30,120,255,1), rgba(34,197,94,1));
+      box-shadow: 0 14px 26px rgba(30,120,255,.20);
+      position:relative; flex:0 0 auto;
+    }
+    .logo:after{
+      content:"";
+      position:absolute; left:13px; top:10px;
+      width:0;height:0;
+      border-left: 11px solid rgba(255,255,255,.95);
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+    }
+    .brandText{ display:flex; flex-direction:column; min-width:0; }
+    .brandText b{
+      font-size:16px; letter-spacing:.2px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 54vw;
+    }
+    .brandText span{ font-size:11px; color:var(--muted); margin-top:2px; }
+    .spacer{ flex:1; }
+
+    .pill{
+      padding:7px 10px;border-radius:999px;
+      background: rgba(148,163,184,.10);
+      border:1px solid rgba(148,163,184,.16);
+      color: var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .iconBtn{
+      width:40px;height:40px;border-radius: 14px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;
+      user-select:none;
+    }
+    .iconBtn.primary{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.16);}
+    .iconBtn.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.14);}
+
+    .searchRow{ margin-top: 10px; display:flex; gap:10px; align-items:center; }
+    .search{
+      flex:1; display:flex; gap:10px; align-items:center;
+      padding: 10px 12px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .search input{
+      width:100%;
+      border:0; outline:0;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .search input::placeholder{ color: rgba(148,163,184,.75); }
+    .clearBtn{
+      border:0; background: transparent;
+      color: rgba(255,255,255,.75);
+      cursor:pointer; display:none;
+      font-size:16px; line-height:1;
+    }
+    .clearBtn.show{ display:block; }
+
+    /* Page */
+    .page{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px;
+      padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    }
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width:860px){ .grid{ grid-template-columns: 1fr 1fr; } }
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .storyItem{
+      display:grid;
+      grid-template-columns: 84px 1fr;
+      gap: 12px;
+      padding: 12px;
+      align-items:center;
+    }
+    .thumb{
+      width:84px;height:110px;
+      border-radius: 16px;
+      overflow:hidden;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    .info{ min-width:0; }
+    .info b{
+      display:block;
+      font-size: 15px;
+      letter-spacing:.2px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .info .meta{
+      margin-top:5px;
+      display:block;
+      color: var(--muted);
+      font-size: 12px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .actions{ margin-top: 10px; display:flex; gap:8px; flex-wrap:wrap; }
+    .btn{
+      padding: 9px 11px;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      cursor:pointer;
+      user-select:none;
+      font-size: 13px;
+    }
+    .btn.primary{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.16);}
+    .btn.danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.14);}
+    .btn.ghost{ background: transparent; }
+
+    .empty{
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: var(--r);
+      background: rgba(148,163,184,.08);
+      border: 1px dashed rgba(148,163,184,.22);
+      color: var(--muted);
+      line-height: 1.4;
+      display:none;
+    }
+
+    /* Floating add */
+    .fab{
+      position: fixed;
+      right: 14px;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      border: 1px solid rgba(30,120,255,.40);
+      background: linear-gradient(135deg, rgba(30,120,255,.95), rgba(34,197,94,.85));
+      color: #fff;
+      font-size: 26px;
+      box-shadow: 0 18px 40px rgba(30,120,255,.22);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      z-index:25;
+    }
+
+    /* Bottom sheet */
+    .sheetBackdrop{ position:fixed; inset:0; background: rgba(0,0,0,.55); display:none; z-index:40; }
+    .sheetBackdrop.show{ display:block; }
+    .sheet{
+      position:fixed; left:0; right:0; bottom:0; z-index:50;
+      transform: translateY(110%);
+      transition: transform .22s ease;
+      background: rgba(10,12,16,.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px 22px 0 0;
+      box-shadow: 0 -22px 60px rgba(0,0,0,.62);
+      max-height: min(88dvh, 760px);
+      display:flex; flex-direction:column;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .sheet.open{ transform: translateY(0); }
+    .sheetHead{ padding: 10px 12px; display:flex; align-items:center; gap:10px; border-bottom: 1px solid var(--line); }
+    .sheetHead b{ font-size: 14px; }
+    .sheetBody{ padding: 12px; overflow:auto; }
+    .sheetFoot{
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+      background: rgba(255,255,255,.02);
+    }
+
+    label{ display:block; font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
+    .in{
+      width:100%;
+      padding: 11px 11px;
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(255,255,255,.06);
+      outline:none;
+      color: var(--text);
+    }
+    .in::placeholder{ color: rgba(148,163,184,.70); }
+    .in:focus{ border-color: rgba(30,120,255,.45); box-shadow: 0 0 0 3px rgba(30,120,255,.14); }
+
+    .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width:560px){ .grid2{ grid-template-columns:1fr; } }
+
+    .epiRows{ margin-top: 8px; display:flex; flex-direction:column; gap: 8px; }
+    .epiRow{ display:grid; grid-template-columns: 90px 1fr 44px; gap: 8px; align-items:center; }
+    .remove{
+      width:44px;height:44px;border-radius:16px;
+      border: 1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.14);
+      color:#fff; cursor:pointer;
+    }
+    .addEpi{ display:flex; align-items:center; gap:10px; margin-top: 10px; }
+    .plus{
+      width:44px;height:44px;border-radius:16px;
+      border: 1px solid rgba(34,197,94,.35);
+      background: rgba(34,197,94,.16);
+      color:#fff; cursor:pointer; font-size: 22px;
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+    }
+    .hint{ color: var(--muted); font-size: 12px; line-height: 1.35; }
+
+    /* Login modal */
+    .modal{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.70);
+      backdrop-filter: blur(16px);
+      display:none; align-items:center; justify-content:center;
+      padding: 14px;
+      z-index:70;
+    }
+    .modal.show{ display:flex; }
+    .modalBox{
+      width: min(420px, 94vw);
+      border-radius: 22px;
+      background:
+        radial-gradient(700px 280px at 30% -10%, rgba(30,120,255,.22), transparent 55%),
+        radial-gradient(600px 260px at 90% 0%, rgba(34,197,94,.16), transparent 55%),
+        rgba(10,12,16,.92);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .modalTop{ display:flex; align-items:center; gap:10px; margin-bottom: 10px; }
+    .badge{
+      width:40px;height:40px;border-radius:16px;
+      background: rgba(30,120,255,.16);
+      border: 1px solid rgba(30,120,255,.25);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+    }
+    .err{
+      display:none;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.14);
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .err.show{ display:block; }
+    .tiny{ font-size:12px; color: var(--muted); margin-right:auto; }
+  </style>
+</head>
+<body>
+
+  <div class="appbar">
+    <div class="barRow">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="brandText">
+          <b>Kahani Play — Admin</b>
+          <span>Firebase Firestore Connected</span>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="pill" id="countPill">0 Stories</div>
+      <a class="pill" href="user.html">Open User</a>
+      <button class="iconBtn primary" id="openSheetBtn" title="Add Story">＋</button>
+      <button class="iconBtn" id="logoutBtn" title="Logout">⎋</button>
+    </div>
+
+    <div class="searchRow">
+      <div class="search">
+        <input id="searchInput" placeholder="Search story / folder..." autocomplete="off" />
+        <button class="clearBtn" id="clearBtn" title="Clear">✕</button>
+      </div>
+      <button class="iconBtn danger" id="clearAllBtn" title="Clear All">🗑</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="grid" id="list"></div>
+    <div class="empty" id="empty">Abhi koi story add nahi hai.</div>
+  </div>
+
+  <button class="fab" id="fab" title="Add">+</button>
+
+  <!-- Bottom Sheet -->
+  <div class="sheetBackdrop" id="sheetBackdrop"></div>
+  <div class="sheet" id="sheet" aria-hidden="true">
+    <div class="sheetHead">
+      <button class="iconBtn" id="sheetCloseBtn" title="Close">✕</button>
+      <b id="sheetTitle">Add Story</b>
+      <div class="spacer"></div>
+      <button class="btn primary" id="saveBtn">Save</button>
+    </div>
+
+    <div class="sheetBody">
+      <input type="hidden" id="editingId" value="" />
+
+      <div class="grid2">
+        <div>
+          <label>Apk ya Folder Name (group)</label>
+          <input class="in" type="text" id="folderName" placeholder="example: Folder-A" />
+        </div>
+        <div>
+          <label>Story Name</label>
+          <input class="in" type="text" id="storyName" placeholder="example: Horror Kahani" />
+        </div>
+      </div>
+
+      <label>Story Poster Link</label>
+      <input class="in" type="url" id="posterUrl" placeholder="https://.../poster.jpg" />
+
+      <label>Episodes</label>
+      <div class="epiRows" id="epiRows"></div>
+
+      <div class="addEpi">
+        <button class="plus" id="addEpiBtn" type="button">+</button>
+        <div class="hint">Plus icon se multiple episodes add karein</div>
+      </div>
+    </div>
+
+    <div class="sheetFoot">
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+      <button class="btn ghost" id="closeBtn2" type="button">Close</button>
+    </div>
+  </div>
+
+  <!-- Login Modal: only "Username" and "Password" (no Deepak/Firebase text) -->
+  <div class="modal" id="loginModal">
+    <div class="modalBox">
+      <div class="modalTop">
+        <div class="badge">A</div>
+        <b>Admin Login</b>
+      </div>
+
+      <label>Username</label>
+      <input class="in" type="text" id="loginUser" autocomplete="off" placeholder="Enter username" />
+
+      <label>Password</label>
+      <input class="in" type="password" id="loginPass" autocomplete="off" placeholder="Enter password" />
+
+      <div style="margin-top:12px; display:flex; justify-content:flex-end; gap:10px; align-items:center;">
+        <span class="tiny" id="loginStatus"></span>
+        <button class="btn primary" id="loginBtn" type="button">Login</button>
+      </div>
+
+      <div class="err" id="loginErr">Wrong username/password or Firebase login failed.</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+    import {
+      getFirestore, collection, addDoc, doc, updateDoc, deleteDoc,
+      onSnapshot, query, orderBy, serverTimestamp, getDocs, writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import {
+      getAuth, setPersistence, browserLocalPersistence,
+      signInWithEmailAndPassword, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnCCWVcNhFBTCh7Tu9ctQ7QiGasUvgw4s",
+      authDomain: "kuku-1cb36.firebaseapp.com",
+      projectId: "kuku-1cb36",
+      storageBucket: "kuku-1cb36.firebasestorage.app",
+      messagingSenderId: "1089968385102",
+      appId: "1:1089968385102:web:bf53c0b9b05c5659e3671f",
+      measurementId: "G-FPTKTH9QXT"
+    };
+
+    // Login requirement:
+    // Username must be Deepak, Password = your Firebase Auth password
+    const ADMIN_USERNAME = "Deepak";
+    const FB_EMAIL = "aaa39269012@gmail.com";
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch(e) {}
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // UI refs
+    const countPill = document.getElementById("countPill");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearBtn");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    const openSheetBtn = document.getElementById("openSheetBtn");
+    const fab = document.getElementById("fab");
+
+    const list = document.getElementById("list");
+    const empty = document.getElementById("empty");
+
+    const sheetBackdrop = document.getElementById("sheetBackdrop");
+    const sheet = document.getElementById("sheet");
+    const sheetCloseBtn = document.getElementById("sheetCloseBtn");
+    const closeBtn2 = document.getElementById("closeBtn2");
+    const sheetTitle = document.getElementById("sheetTitle");
+
+    const editingId = document.getElementById("editingId");
+    const folderName = document.getElementById("folderName");
+    const storyName = document.getElementById("storyName");
+    const posterUrl = document.getElementById("posterUrl");
+    const epiRows = document.getElementById("epiRows");
+    const addEpiBtn = document.getElementById("addEpiBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const loginModal = document.getElementById("loginModal");
+    const loginUser = document.getElementById("loginUser");
+    const loginPass = document.getElementById("loginPass");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginErr = document.getElementById("loginErr");
+    const loginStatus = document.getElementById("loginStatus");
+
+    const storiesCol = collection(db, "stories");
+
+    let stories = [];
+    let unsub = null;
+
+    function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));}
+    function normFolder(f){f=(f||"").trim(); return f?f:"Default";}
+
+    function openSheet(title){
+      sheetTitle.textContent = title || "Add Story";
+      sheetBackdrop.classList.add("show");
+      sheet.classList.add("open");
+      sheet.setAttribute("aria-hidden","false");
+    }
+    function closeSheet(){
+      sheetBackdrop.classList.remove("show");
+      sheet.classList.remove("open");
+      sheet.setAttribute("aria-hidden","true");
+    }
+
+    function addEpiRow(num="", url=""){
+      const row = document.createElement("div");
+      row.className = "epiRow";
+
+      const n = document.createElement("input");
+      n.className = "in";
+      n.type = "number";
+      n.min = "1";
+      n.placeholder = "Epi";
+      n.value = num;
+
+      const u = document.createElement("input");
+      u.className = "in";
+      u.type = "url";
+      u.placeholder = "Epi link (video url)";
+      u.value = url;
+
+      const rm = document.createElement("button");
+      rm.className = "remove";
+      rm.type = "button";
+      rm.textContent = "×";
+      rm.onclick = () => {
+        row.remove();
+        if(!epiRows.children.length) addEpiRow(1,"");
+      };
+
+      row.appendChild(n); row.appendChild(u); row.appendChild(rm);
+      epiRows.appendChild(row);
+    }
+
+    function collectEpisodes(){
+      const eps = [];
+      [...epiRows.querySelectorAll(".epiRow")].forEach(r=>{
+        const inputs = r.querySelectorAll("input");
+        const num = Number(inputs[0].value || 0);
+        const url = (inputs[1].value || "").trim();
+        if(!url) return;
+        eps.push({ num: num>0 ? num : null, url });
+      });
+      eps.sort((a,b)=>(a.num??999999)-(b.num??999999));
+      return eps;
+    }
+
+    function resetForm(){
+      editingId.value = "";
+      folderName.value = "";
+      storyName.value = "";
+      posterUrl.value = "";
+      epiRows.innerHTML = "";
+      addEpiRow(1,"");
+      sheetTitle.textContent = "Add Story";
+    }
+
+    function loadIntoForm(story){
+      editingId.value = story.id;
+      folderName.value = story.folderName || "";
+      storyName.value = story.storyName || "";
+      posterUrl.value = story.posterUrl || "";
+      epiRows.innerHTML = "";
+      (story.episodes || []).forEach(ep => addEpiRow(ep.num ?? "", ep.url ?? ""));
+      if(!epiRows.children.length) addEpiRow(1,"");
+      sheetTitle.textContent = "Edit Story";
+    }
+
+    function render(){
+      const q = (searchInput.value || "").trim().toLowerCase();
+      clearBtn.classList.toggle("show", q.length>0);
+
+      const filtered = q
+        ? stories.filter(s =>
+            (s.storyName||"").toLowerCase().includes(q) ||
+            normFolder(s.folderName).toLowerCase().includes(q)
+          )
+        : stories;
+
+      countPill.textContent = `${stories.length} Stories`;
+      list.innerHTML = "";
+      empty.style.display = filtered.length ? "none" : "block";
+
+      filtered.forEach(s=>{
+        const wrap = document.createElement("div");
+        wrap.className = "card";
+        wrap.innerHTML = `
+          <div class="storyItem">
+            <div class="thumb"><img alt="thumb" src="${esc(s.posterUrl||"")}"></div>
+            <div class="info">
+              <b>${esc(s.storyName || "(No name)")}</b>
+              <span class="meta">Folder: ${esc(normFolder(s.folderName))} • Episodes: ${s.episodes?.length || 0}</span>
+              <div class="actions">
+                <button class="btn" data-act="edit" type="button">Edit</button>
+                <button class="btn danger" data-act="del" type="button">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+        wrap.querySelector('[data-act="edit"]').onclick = () => {
+          loadIntoForm(s);
+          openSheet("Edit Story");
+        };
+        wrap.querySelector('[data-act="del"]').onclick = async () => {
+          if(!confirm("Is story ko delete karein?")) return;
+          await deleteDoc(doc(db, "stories", s.id));
+        };
+        list.appendChild(wrap);
+      });
+    }
+
+    function startRealtime(){
+      if (unsub) unsub();
+      const qy = query(storiesCol, orderBy("updatedAt", "desc"));
+      unsub = onSnapshot(qy, (snap) => {
+        stories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        render();
+      });
+    }
+
+    async function clearAll(){
+      if(!confirm("ALL stories delete ho jayengi. Continue?")) return;
+
+      const snap = await getDocs(storiesCol);
+      let batch = writeBatch(db);
+      let i = 0;
+
+      for (const d of snap.docs) {
+        batch.delete(d.ref);
+        i++;
+        if (i % 400 === 0) {
+          await batch.commit();
+          batch = writeBatch(db);
+        }
+      }
+      await batch.commit();
+    }
+
+    // Events
+    function openAdd(){
+      resetForm();
+      openSheet("Add Story");
+    }
+    openSheetBtn.onclick = openAdd;
+    fab.onclick = openAdd;
+
+    sheetBackdrop.onclick = closeSheet;
+    sheetCloseBtn.onclick = closeSheet;
+    closeBtn2.onclick = closeSheet;
+
+    addEpiBtn.onclick = () => {
+      const nums = [...epiRows.querySelectorAll('input[type="number"]')]
+        .map(i=>Number(i.value||0)).filter(n=>n>0);
+      const next = nums.length ? Math.max(...nums)+1 : (epiRows.children.length+1);
+      addEpiRow(next, "");
+    };
+
+    resetBtn.onclick = resetForm;
+
+    saveBtn.onclick = async () => {
+      const f = folderName.value.trim();
+      const name = storyName.value.trim();
+      const poster = posterUrl.value.trim();
+      const episodes = collectEpisodes();
+
+      if(!f) return alert("Folder/Apk name required.");
+      if(!name) return alert("Story name required.");
+      if(!poster) return alert("Poster link required.");
+      if(!episodes.length) return alert("At least 1 episode link required.");
+
+      const id = editingId.value.trim();
+
+      if (id) {
+        await updateDoc(doc(db, "stories", id), {
+          folderName: f,
+          storyName: name,
+          posterUrl: poster,
+          episodes,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        await addDoc(storiesCol, {
+          folderName: f,
+          storyName: name,
+          posterUrl: poster,
+          episodes,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+
+      closeSheet();
+      resetForm();
+    };
+
+    clearAllBtn.onclick = clearAll;
+    searchInput.addEventListener("input", render);
+    clearBtn.onclick = () => { searchInput.value=""; render(); };
+
+    logoutBtn.onclick = async () => {
+      closeSheet();
+      resetForm();
+      await signOut(auth);
+    };
+
+    // LOGIN: Username must be Deepak, Password = Firebase password (but UI only says "Password")
+    async function doLogin(){
+      loginErr.classList.remove("show");
+      loginStatus.textContent = "Signing in...";
+      loginBtn.disabled = true;
+
+      const u = (loginUser.value || "").trim();
+      const p = (loginPass.value || "").trim();
+
+      if (u !== ADMIN_USERNAME) {
+        loginErr.classList.add("show");
+        loginStatus.textContent = "";
+        loginBtn.disabled = false;
+        return;
+      }
+
+      try{
+        await setPersistence(auth, browserLocalPersistence);
+        await signInWithEmailAndPassword(auth, FB_EMAIL, p);
+      } catch(e){
+        loginErr.classList.add("show");
+      } finally {
+        loginStatus.textContent = "";
+        loginBtn.disabled = false;
+      }
+    }
+
+    loginBtn.onclick = doLogin;
+    loginUser.addEventListener("keydown", (e)=>{ if(e.key==="Enter") doLogin(); });
+    loginPass.addEventListener("keydown", (e)=>{ if(e.key==="Enter") doLogin(); });
+
+    onAuthStateChanged(auth, (user) => {
+      const ok = !!user;
+      loginModal.classList.toggle("show", !ok);
+
+      // ensure fields never show default values
+      if (!ok) {
+        loginUser.value = "";
+        loginPass.value = "";
+      }
+
+      if (ok) startRealtime();
+      else { if (unsub) unsub(); stories=[]; render(); }
+    });
+
+    // init
+    resetForm();
+  </script>
+</body>
+</html>

@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Kahani Play</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --bg2:#070b10;
+      --muted:#9aa7bd; --text:#e9eef7;
+      --blue:#1e78ff; --line:rgba(148,163,184,.16);
+      --shadow:0 10px 25px rgba(0,0,0,.35);
+      --r:16px;
+      --bannerH: 60px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(30,120,255,.18) 0%, rgba(30,120,255,0) 55%),
+        radial-gradient(900px 650px at 95% 10%, rgba(34,197,94,.12) 0%, rgba(34,197,94,0) 60%),
+        radial-gradient(900px 650px at 35% 110%, rgba(255,122,24,.10) 0%, rgba(255,122,24,0) 60%),
+        linear-gradient(180deg, #111a2a, var(--bg) 55%, var(--bg2) 100%);
+      color:var(--text);
+      overflow:hidden;
+    }
+    button,input{font:inherit}
+    .app{height:100%;display:flex;flex-direction:column}
+
+    .header{
+      padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
+      background:rgba(0,0,0,.30);
+      border-bottom:1px solid var(--line);
+      backdrop-filter:blur(10px);
+    }
+    .headerTop{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .brand{display:flex;align-items:center;gap:10px;user-select:none;min-width:0}
+    .brandMark{
+      width:32px;height:32px;border-radius:10px;
+      background:linear-gradient(145deg,#ff7a18,#ff3d3d);
+      box-shadow:0 10px 20px rgba(255,61,61,.18);
+      position:relative;flex:0 0 auto
+    }
+    .brandMark:after{
+      content:"";
+      position:absolute;inset:9px 8px 9px 12px;
+      border-left:14px solid rgba(255,255,255,.95);
+      border-top:8px solid transparent;
+      border-bottom:8px solid transparent
+    }
+    .brandName{
+      font-weight:900;letter-spacing:.4px;font-size:20px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .spacer{flex:1}
+    .pill{
+      padding:7px 10px;border-radius:999px;
+      background:rgba(148,163,184,.12);
+      border:1px solid rgba(148,163,184,.18);
+      color:var(--muted);
+      font-size:12px;white-space:nowrap
+    }
+    .search{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08)
+    }
+    .search input{width:100%;border:0;outline:0;background:transparent;color:var(--text);font-size:14px}
+    .search input::placeholder{color:rgba(154,167,189,.75)}
+    .clearBtn{border:0;background:transparent;color:rgba(255,255,255,.7);cursor:pointer;display:none}
+    .clearBtn.show{display:inline-block}
+
+    .content{
+      flex:1;overflow:auto;
+      padding:12px;
+      padding-bottom:calc(84px + env(safe-area-inset-bottom));
+    }
+    .emptyState{
+      margin-top:0;
+      padding:12px;
+      border-radius:var(--r);
+      background:rgba(148,163,184,.08);
+      border:1px dashed rgba(148,163,184,.22);
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .bannerRow{display:flex;gap:10px;overflow:auto;padding-bottom:6px;scrollbar-width:none}
+    .bannerRow::-webkit-scrollbar{display:none}
+    .banner{
+      flex:0 0 auto;width:min(78vw,360px);aspect-ratio:16/9;
+      border-radius:18px;overflow:hidden;position:relative;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      box-shadow:0 12px 30px rgba(0,0,0,.35);
+      cursor:pointer
+    }
+    .banner img{width:100%;height:100%;object-fit:cover;display:block}
+    .banner:after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,0) 55%);
+      pointer-events:none
+    }
+    .bannerTitle{
+      position:absolute;left:12px;right:12px;bottom:10px;
+      font-weight:800;font-size:14px;
+      text-shadow:0 10px 20px rgba(0,0,0,.6);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+
+    .section{margin-top:14px}
+    .sectionHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .bar{width:4px;height:22px;border-radius:10px;background:var(--blue);box-shadow:0 10px 20px rgba(30,120,255,.25)}
+    .sectionTitle{font-size:18px;font-weight:900}
+    .viewAll{
+      margin-left:auto;padding:10px 14px;border-radius:999px;border:0;
+      background:rgba(30,120,255,.95);color:#fff;font-weight:700;
+      cursor:pointer;box-shadow:0 10px 18px rgba(30,120,255,.20)
+    }
+    .hRow{display:flex;gap:12px;overflow:auto;padding-bottom:4px;scrollbar-width:none}
+    .hRow::-webkit-scrollbar{display:none}
+
+    .card{
+      flex:0 0 auto;width:170px;border-radius:18px;overflow:hidden;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 10px 22px rgba(0,0,0,.25);
+      cursor:pointer
+    }
+    .cardPoster{width:100%;aspect-ratio:16/11;position:relative;overflow:hidden;background:rgba(255,255,255,.04)}
+    .cardPoster img{width:100%;height:100%;object-fit:cover;display:block}
+    .cardPoster:after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0) 70%);
+      pointer-events:none
+    }
+    .cardBody{padding:10px 10px 12px}
+    .cardName{font-weight:800;font-size:14px;line-height:1.2;max-height:2.4em;overflow:hidden}
+    .cardMeta{margin-top:8px;color:rgba(154,167,189,.9);font-size:12px;display:flex;gap:8px;align-items:center}
+
+    .pageTop{
+      display:flex;align-items:center;gap:10px;margin-bottom:10px;
+      position:sticky;top:0;padding:10px 0;
+      background:linear-gradient(to bottom, rgba(11,15,20,.92), rgba(11,15,20,0));
+      backdrop-filter:blur(8px);z-index:5
+    }
+    .backBtn{
+      width:42px;height:42px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;cursor:pointer
+    }
+    .pageTitle{font-weight:900;font-size:18px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    @media (min-width:520px){.grid{grid-template-columns:repeat(5,1fr)}}
+    @media (max-width:330px){.grid{grid-template-columns:repeat(2,1fr)}}
+    .posterTile{
+      border-radius:14px;overflow:hidden;aspect-ratio:2/3;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      box-shadow:0 10px 22px rgba(0,0,0,.22);
+      cursor:pointer;position:relative
+    }
+    .posterTile img{width:100%;height:100%;object-fit:cover;display:block}
+    .posterTile:after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 70%);
+      pointer-events:none
+    }
+
+    .bottomNav{
+      position:fixed;left:0;right:0;bottom:0;
+      padding-bottom:env(safe-area-inset-bottom);
+      background:rgba(0,0,0,.35);
+      backdrop-filter:blur(10px);
+      border-top:1px solid var(--line);
+      z-index:20
+    }
+    .navRow{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 8px 10px}
+    .navItem{
+      border:0;background:transparent;color:rgba(233,238,247,.85);
+      cursor:pointer;padding:10px 8px;border-radius:14px;
+      display:flex;flex-direction:column;align-items:center;gap:6px
+    }
+    .navItem.active{background:rgba(255,255,255,.06);color:#fff}
+    .navIcon{
+      width:22px;height:22px;background:currentColor;
+      -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;
+      mask-size:contain;mask-repeat:no-repeat;mask-position:center
+    }
+    .navLbl{font-size:12px;font-weight:700}
+    .i-home{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 3l9 8h-3v10h-5v-6H11v6H6V11H3z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 3l9 8h-3v10h-5v-6H11v6H6V11H3z"/></svg>')}
+    .i-folder{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M10 4l2 2h8a2 2 0 0 1 2 2v1H2V6a2 2 0 0 1 2-2h6zm12 7v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9h20z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M10 4l2 2h8a2 2 0 0 1 2 2v1H2V6a2 2 0 0 1 2-2h6zm12 7v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9h20z"/></svg>')}
+    .i-app{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>')}
+    .i-join{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 2-8 4.5V21h16v-2.5C20 16 16.42 14 12 14z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 2-8 4.5V21h16v-2.5C20 16 16.42 14 12 14z"/></svg>')}
+
+    /* PLAYER */
+    .overlay{position:fixed;inset:0;background:#000;display:none;z-index:50;height:100dvh;}
+    .overlay.show{display:block}
+    .playerWrap{position:absolute;inset:0;display:flex;flex-direction:column;background:#000;overflow:hidden;height:100%;}
+    .adSlot{flex:0 0 auto;display:flex;align-items:center;justify-content:center;background: rgba(11,15,20,.65);}
+    .adSlot.top{height: calc(var(--bannerH) + env(safe-area-inset-top));padding-top: env(safe-area-inset-top);border-bottom:1px solid rgba(148,163,184,.16);}
+    .adSlot.bottom{height: calc(var(--bannerH) + env(safe-area-inset-bottom));padding-bottom: env(safe-area-inset-bottom);border-top:1px solid rgba(148,163,184,.16);}
+    .adInner{
+      width: min(468px, calc(100vw - 20px));
+      height: var(--bannerH);
+      display:flex;align-items:center;justify-content:center;
+      border-radius: 12px;border:1px dashed rgba(148,163,184,.25);
+      color: rgba(154,167,189,.85);
+      font-size: 12px; user-select:none; margin:0 10px;
+    }
+    .videoStage{
+      position:relative;overflow:hidden;background:#000;
+      height: calc(100dvh - (var(--bannerH) * 2) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      flex:0 0 auto;
+      touch-action:none;
+    }
+    video{width:100%;height:100%;object-fit:contain;background:#000;}
+
+    .playerHUD{position:absolute;inset:0;pointer-events:none}
+    .hudTop{
+      position:absolute;top:10px;left:10px;right:10px;
+      display:flex;gap:10px;align-items:center;pointer-events:none
+    }
+    .hudBtn{
+      pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;
+      width:42px;height:42px;border-radius:14px;
+      background:rgba(17,24,39,.55);
+      border:1px solid rgba(148,163,184,.22);
+      color:#fff;box-shadow:0 10px 20px rgba(0,0,0,.3);cursor:pointer
+    }
+    .hudTitle{
+      pointer-events:none;
+      padding:8px 10px;border-radius:12px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.92);
+      font-size:12px;
+      max-width:min(620px, calc(100vw - 160px));
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      flex:1;
+    }
+    .hudTopRight{margin-left:auto;pointer-events:none}
+    .hudTopRight .hudBtn{pointer-events:auto}
+
+    .icon{width:18px;height:18px;display:inline-block;background:currentColor;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center}
+    .i-back{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M10.828 12l4.95-4.95-1.414-1.414L8.0 12l6.364 6.364 1.414-1.414z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M10.828 12l4.95-4.95-1.414-1.414L8.0 12l6.364 6.364 1.414-1.414z"/></svg>')}
+    .i-list{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>')}
+    .i-close{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L12 13.41l-6.89 6.3-1.42-1.41L10.59 12 3.69 5.71 5.1 4.29 12 10.59l6.89-6.3z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L12 13.41l-6.89 6.3-1.42-1.41L10.59 12 3.69 5.71 5.1 4.29 12 10.59l6.89-6.3z"/></svg>')}
+
+    .drawerBackdrop{position:absolute;inset:0;background:rgba(0,0,0,.35);display:none;pointer-events:auto;z-index:10}
+    .drawerBackdrop.show{display:block}
+    .drawer{
+      position:absolute;top:0;right:0;height:100%;width:min(330px,86vw);
+      background:rgba(11,15,20,.94);
+      border-left:1px solid rgba(148,163,184,.18);
+      backdrop-filter:blur(10px);
+      transform:translateX(100%);
+      transition:transform .22s ease;
+      pointer-events:auto;
+      display:flex;flex-direction:column;
+      z-index:11;
+    }
+    .drawer.open{transform:translateX(0)}
+    .drawerHeader{padding:12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(148,163,184,.16)}
+    .drawerHeader h3{margin:0;font-size:16px;flex:1}
+    .epiList{padding:10px;overflow:auto}
+    .epiItem{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:12px;border-radius:16px;
+      background:rgba(148,163,184,.08);
+      border:1px solid rgba(148,163,184,.12);
+      cursor:pointer;margin-bottom:10px
+    }
+    .epiItem.active{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.38)}
+    .epiMeta b{font-size:14px}
+    .epiMeta span{font-size:12px;color:var(--muted)} /* no URL shown */
+
+    .ad{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8);z-index:20}
+    .ad.show{display:flex}
+    .adBox{width:min(520px,92vw);border-radius:18px;background:rgba(17,24,39,.95);border:1px solid rgba(148,163,184,.2);box-shadow:var(--shadow);padding:16px}
+    .adTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .adHint{color:var(--muted);font-size:12px;line-height:1.35}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="headerTop">
+        <div class="brand">
+          <div class="brandMark"></div>
+          <div class="brandName">Kahani Play</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="pill" id="countPill">0 Stories</div>
+      </div>
+      <div class="search">
+        <input id="searchInput" placeholder="Search stories..." autocomplete="off" />
+        <button class="clearBtn" id="clearBtn" title="Clear">✕</button>
+      </div>
+    </div>
+
+    <div class="content" id="content"></div>
+
+    <div class="bottomNav">
+      <div class="navRow">
+        <button class="navItem active" id="navHome"><span class="navIcon i-home"></span><span class="navLbl">Home</span></button>
+        <button class="navItem" id="navFolders"><span class="navIcon i-folder"></span><span class="navLbl">Folders</span></button>
+        <button class="navItem" id="navApp"><span class="navIcon i-app"></span><span class="navLbl">App</span></button>
+        <button class="navItem" id="navJoin"><span class="navIcon i-join"></span><span class="navLbl">Join</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="playerOverlay" aria-hidden="true">
+    <div class="playerWrap">
+      <div class="adSlot top"><div class="adInner">Top Banner 468×60</div></div>
+
+      <div class="videoStage" id="videoStage">
+        <video id="video"
+               playsinline webkit-playsinline
+               controls
+               controlsList="nodownload nofullscreen noremoteplayback"
+               disablepictureinpicture></video>
+
+        <div class="playerHUD">
+          <div class="hudTop">
+            <button class="hudBtn" id="playerBackBtn" title="Back"><span class="icon i-back"></span></button>
+            <div class="hudTitle" id="hudTitle">—</div>
+            <div class="hudTopRight">
+              <button class="hudBtn" id="episodeBtn" title="Episodes"><span class="icon i-list"></span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="drawerBackdrop" id="drawerBackdrop"></div>
+        <div class="drawer" id="drawer">
+          <div class="drawerHeader">
+            <button class="hudBtn" id="drawerCloseBtn" title="Close"><span class="icon i-close"></span></button>
+            <h3 id="drawerTitle">Episodes</h3>
+          </div>
+          <div class="epiList" id="epiList"></div>
+        </div>
+
+        <div class="ad" id="adOverlay">
+          <div class="adBox">
+            <div class="adTop">
+              <b>Ad</b>
+              <div class="pill" id="adTimer">5s</div>
+            </div>
+            <div class="adHint">Har 3rd episode par ad (demo placeholder).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="adSlot bottom"><div class="adInner">Bottom Banner 468×60</div></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+    import {
+      getFirestore, collection, onSnapshot, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnCCWVcNhFBTCh7Tu9ctQ7QiGasUvgw4s",
+      authDomain: "kuku-1cb36.firebaseapp.com",
+      projectId: "kuku-1cb36",
+      storageBucket: "kuku-1cb36.firebasestorage.app",
+      messagingSenderId: "1089968385102",
+      appId: "1:1089968385102:web:bf53c0b9b05c5659e3671f",
+      measurementId: "G-FPTKTH9QXT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch(e) {}
+    const db = getFirestore(app);
+
+    const content = document.getElementById("content");
+    const countPill = document.getElementById("countPill");
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const navHome = document.getElementById("navHome");
+    const navFolders = document.getElementById("navFolders");
+    const navApp = document.getElementById("navApp");
+    const navJoin = document.getElementById("navJoin");
+
+    const playerOverlay = document.getElementById("playerOverlay");
+    const videoStage = document.getElementById("videoStage");
+    const video = document.getElementById("video");
+    const playerBackBtn = document.getElementById("playerBackBtn");
+    const hudTitle = document.getElementById("hudTitle");
+
+    const episodeBtn = document.getElementById("episodeBtn");
+    const drawer = document.getElementById("drawer");
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const drawerCloseBtn = document.getElementById("drawerCloseBtn");
+    const drawerTitle = document.getElementById("drawerTitle");
+    const epiList = document.getElementById("epiList");
+
+    const adOverlay = document.getElementById("adOverlay");
+    const adTimer = document.getElementById("adTimer");
+
+    video.addEventListener("contextmenu", (e)=>e.preventDefault());
+
+    let stories = [];
+    let view = { mode:"home", folder:null };
+    let currentStoryId = null;
+    let currentEpisodeIndex = 0;
+    let isAdShowing = false;
+    let adInterval = null;
+
+    const resolvedCache = new Map();
+
+    function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));}
+    function normFolder(f){f=(f||"").trim(); return f?f:"Default";}
+    function setOverlay(el,on){el.classList.toggle("show",!!on); el.setAttribute("aria-hidden", on?"false":"true");}
+    function getStory(id){return stories.find(s=>s.id===id)||null;}
+    function getFolders(){return [...new Set(stories.map(s=>normFolder(s.folderName)))].sort((a,b)=>a.localeCompare(b));}
+
+    // Firestore realtime
+    const storiesCol = collection(db, "stories");
+    const qy = query(storiesCol, orderBy("updatedAt", "desc"));
+    onSnapshot(qy, (snap) => {
+      stories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    });
+
+    function setActiveNav(which){
+      [navHome,navFolders,navApp,navJoin].forEach(b=>b.classList.remove("active"));
+      ({home:navHome, folders:navFolders, app:navApp, join:navJoin}[which]||navHome).classList.add("active");
+    }
+
+    // Archive auto-direct
+    function extractUrlFromMaybeIframe(input) {
+      const s = (input || "").trim();
+      if (!s) return "";
+      if (!s.includes("<iframe")) return s;
+      const m = s.match(/src\s*=\s*["']([^"']+)["']/i);
+      return m ? m[1] : s;
+    }
+
+    async function resolvePlayableUrl(inputUrl){
+      let u = extractUrlFromMaybeIframe(inputUrl);
+      if (!u) return u;
+
+      if (resolvedCache.has(u)) return resolvedCache.get(u);
+
+      if (/\.(mp4|webm|ogg|m3u8)(\?.*)?$/i.test(u)) {
+        resolvedCache.set(u, u);
+        return u;
+      }
+
+      const m = u.match(/^https?:\/\/archive\.org\/details\/([^/?#]+)/i);
+      if (m) {
+        const id = m[1];
+        const metaUrl = `https://archive.org/metadata/${encodeURIComponent(id)}`;
+        const res = await fetch(metaUrl, { mode: "cors" });
+        if (!res.ok) throw new Error("Archive metadata not accessible");
+        const data = await res.json();
+        const files = (data.files || []).filter(f => {
+          const fmt = String(f.format || "").toLowerCase();
+          const name = String(f.name || "");
+          return fmt === "mpeg4" || /\.mp4$/i.test(name);
+        });
+        files.sort((a,b) => Number(b.size || 0) - Number(a.size || 0));
+        const file = files[0];
+        if (!file?.name) throw new Error("No MP4 found");
+        const direct = `https://archive.org/download/${encodeURIComponent(id)}/${encodeURIComponent(file.name)}`;
+        resolvedCache.set(u, direct);
+        return direct;
+      }
+
+      return u;
+    }
+
+    // UI
+    function render(){
+      countPill.textContent = `${stories.length} Stories`;
+      const q = (searchInput.value||"").trim().toLowerCase();
+      clearBtn.classList.toggle("show", q.length>0);
+
+      if(view.mode==="home"){
+        setActiveNav("home");
+        if(q) return renderSearch(q);
+        return renderHome();
+      }
+      if(view.mode==="folders"){
+        setActiveNav("folders");
+        return renderFoldersIndex();
+      }
+      if(view.mode==="folder"){
+        setActiveNav("folders");
+        return renderFolderPage(view.folder);
+      }
+    }
+
+    function renderEmpty(html){
+      content.innerHTML = `<div class="emptyState">${html}</div>`;
+    }
+
+    function renderSearch(q){
+      const matched = stories.filter(s =>
+        (s.storyName||"").toLowerCase().includes(q) ||
+        normFolder(s.folderName).toLowerCase().includes(q)
+      );
+      if(!matched.length) return renderEmpty(`No results for <b>${esc(q)}</b>`);
+
+      content.innerHTML = `
+        <div class="pageTop">
+          <button class="backBtn" id="searchBack">←</button>
+          <div class="pageTitle">Results (${matched.length})</div>
+        </div>
+        <div class="grid" id="g"></div>
+      `;
+      document.getElementById("searchBack").onclick = () => { searchInput.value=""; render(); };
+      const g = document.getElementById("g");
+      matched.forEach(s => g.appendChild(posterTile(s)));
+    }
+
+    function renderHome(){
+      if(!stories.length){
+        return renderEmpty(`Abhi koi story add nhi hai, kuch der wait karen`);
+      }
+
+      const banners = stories.slice(0,8);
+      const folders = getFolders();
+
+      content.innerHTML = `<div class="bannerRow" id="bannerRow"></div><div id="sections"></div>`;
+      const br = document.getElementById("bannerRow");
+      banners.forEach(s => br.appendChild(banner(s)));
+
+      const sections = document.getElementById("sections");
+      folders.forEach(folder=>{
+        const items = stories.filter(s=>normFolder(s.folderName)===folder);
+        if(!items.length) return;
+
+        const sec = document.createElement("div");
+        sec.className = "section";
+        sec.innerHTML = `
+          <div class="sectionHead">
+            <div class="bar"></div>
+            <div class="sectionTitle">${esc(folder)}</div>
+            <button class="viewAll">View All ➜</button>
+          </div>
+          <div class="hRow"></div>
+        `;
+        sec.querySelector(".viewAll").onclick = ()=>openFolder(folder,{pushHistory:true});
+        const row = sec.querySelector(".hRow");
+        items.slice(0,20).forEach(s=>row.appendChild(card(s)));
+        sections.appendChild(sec);
+      });
+    }
+
+    function renderFoldersIndex(){
+      const folders = getFolders();
+      if(!folders.length) return renderEmpty("Abhi koi story add nhi hai, kuch der wait karen");
+
+      content.innerHTML = `
+        <div class="pageTop">
+          <button class="backBtn" id="bk">←</button>
+          <div class="pageTitle">Folders</div>
+        </div>
+        <div id="list"></div>
+      `;
+      document.getElementById("bk").onclick = ()=>goHome({pushHistory:true});
+      const list = document.getElementById("list");
+
+      folders.forEach(folder=>{
+        const count = stories.filter(s=>normFolder(s.folderName)===folder).length;
+        const sec = document.createElement("div");
+        sec.className="section";
+        sec.innerHTML = `
+          <div class="sectionHead">
+            <div class="bar"></div>
+            <div class="sectionTitle">${esc(folder)}</div>
+            <div class="pill">${count} stories</div>
+            <button class="viewAll">Open ➜</button>
+          </div>
+        `;
+        sec.querySelector(".viewAll").onclick = ()=>openFolder(folder,{pushHistory:true});
+        list.appendChild(sec);
+      });
+    }
+
+    function renderFolderPage(folder){
+      const f = normFolder(folder);
+      const items = stories.filter(s=>normFolder(s.folderName)===f);
+
+      content.innerHTML = `
+        <div class="pageTop">
+          <button class="backBtn" id="bk">←</button>
+          <div class="pageTitle">${esc(f)} (${items.length})</div>
+        </div>
+        <div class="grid" id="g"></div>
+      `;
+      document.getElementById("bk").onclick = ()=>openFolders({pushHistory:true});
+      const g = document.getElementById("g");
+      items.forEach(s=>g.appendChild(posterTile(s)));
+    }
+
+    function banner(s){
+      const el = document.createElement("div");
+      el.className="banner";
+      el.innerHTML = `<img alt="banner" loading="lazy" src="${esc(s.posterUrl||"")}"><div class="bannerTitle">${esc(s.storyName||"Story")}</div>`;
+      el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
+      return el;
+    }
+    function card(s){
+      const el = document.createElement("div");
+      el.className="card";
+      el.innerHTML = `
+        <div class="cardPoster"><img alt="poster" loading="lazy" src="${esc(s.posterUrl||"")}"></div>
+        <div class="cardBody">
+          <div class="cardName">${esc(s.storyName||"Story")}</div>
+          <div class="cardMeta"><span>📁 ${esc(normFolder(s.folderName))}</span></div>
+        </div>
+      `;
+      el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
+      return el;
+    }
+    function posterTile(s){
+      const el = document.createElement("div");
+      el.className="posterTile";
+      el.innerHTML = `<img alt="poster" loading="lazy" src="${esc(s.posterUrl||"")}">`;
+      el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
+      return el;
+    }
+
+    function goHome({pushHistory=false}={}){
+      view={mode:"home",folder:null};
+      if(pushHistory) history.pushState({view:"home"},"");
+      render();
+    }
+    function openFolders({pushHistory=false}={}){
+      view={mode:"folders",folder:null};
+      if(pushHistory) history.pushState({view:"folders"},"");
+      render();
+    }
+    function openFolder(folder,{pushHistory=false}={}){
+      view={mode:"folder",folder:normFolder(folder)};
+      if(pushHistory) history.pushState({view:"folder",folder:normFolder(folder)},"");
+      render();
+    }
+
+    // Player
+    function isThird(i){return ((i+1)%3)===0}
+    function openDrawer(){drawerBackdrop.classList.add("show"); drawer.classList.add("open")}
+    function closeDrawer(){drawerBackdrop.classList.remove("show"); drawer.classList.remove("open")}
+
+    function showAdThen(cb){
+      if(isAdShowing) return;
+      isAdShowing=true;
+      try{video.pause()}catch{}
+      setOverlay(adOverlay,true);
+      let t=5; adTimer.textContent=t+"s";
+      adInterval=setInterval(()=>{
+        t--; adTimer.textContent=t+"s";
+        if(t<=0){clearInterval(adInterval); adInterval=null; stopAd(); cb && cb();}
+      },1000);
+    }
+    function stopAd(){
+      isAdShowing=false;
+      setOverlay(adOverlay,false);
+      if(adInterval){clearInterval(adInterval); adInterval=null}
+    }
+
+    function renderEpiDrawer(){
+      const story = getStory(currentStoryId); if(!story) return;
+      drawerTitle.textContent = story.storyName || "Episodes";
+      epiList.innerHTML = "";
+      story.episodes.forEach((ep, idx) => {
+        const item = document.createElement("div");
+        item.className = "epiItem" + (idx===currentEpisodeIndex ? " active" : "");
+        item.innerHTML = `
+          <div class="epiMeta">
+            <b>Epi ${ep.num ?? (idx+1)}</b>
+            <span>Play</span>
+          </div>
+          <div class="pill">Play</div>
+        `;
+        item.onclick = () => {
+          const go = async () => {
+            currentEpisodeIndex = idx;
+            await loadEpisode(idx);
+            renderEpiDrawer();
+            closeDrawer();
+            history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
+          };
+          isThird(idx) ? showAdThen(go) : go();
+        };
+        epiList.appendChild(item);
+      });
+    }
+
+    async function loadEpisode(idx){
+      const story = getStory(currentStoryId); if(!story) return;
+      const ep = story.episodes?.[idx]; if(!ep?.url) return alert("Episode link missing.");
+
+      hudTitle.textContent = `${story.storyName||"Story"} • Epi ${ep.num ?? (idx+1)}`;
+
+      video.setAttribute("playsinline","");
+      video.setAttribute("webkit-playsinline","");
+      video.setAttribute("controls","");
+      video.setAttribute("controlsList","nodownload nofullscreen noremoteplayback");
+      video.setAttribute("disablepictureinpicture","");
+
+      let playable;
+      try { playable = await resolvePlayableUrl(ep.url); }
+      catch(e) {
+        alert("Direct playable video nahi mil rahi. Direct .mp4/.m3u8 link use karein (Archive details supported).");
+        return;
+      }
+
+      try{video.pause()}catch{}
+      video.src = playable;
+      video.autoplay = true;
+      const p = video.play(); if(p?.catch) p.catch(()=>{});
+    }
+
+    function openPlayer(storyId, episodeIndex=0, {pushHistory=false}={}){
+      const story = getStory(storyId);
+      if(!story || !story.episodes?.length) return alert("Is story me episodes nahi hain.");
+      currentStoryId = storyId;
+      currentEpisodeIndex = Math.max(0, Math.min(story.episodes.length-1, episodeIndex));
+      setOverlay(playerOverlay,true);
+      closeDrawer();
+      renderEpiDrawer();
+      loadEpisode(currentEpisodeIndex);
+      if(pushHistory) history.pushState({view:"player", storyId, episodeIndex: currentEpisodeIndex},"");
+    }
+
+    function closePlayer(){
+      setOverlay(playerOverlay,false);
+      closeDrawer();
+      stopAd();
+      try{video.pause()}catch{}
+      video.removeAttribute("src"); video.load();
+      currentStoryId=null; currentEpisodeIndex=0;
+    }
+
+    function nextEpisode(){
+      const story = getStory(currentStoryId); if(!story) return;
+      if(currentEpisodeIndex>=story.episodes.length-1) return;
+      const nextIdx = currentEpisodeIndex+1;
+      const go = async () => {
+        currentEpisodeIndex = nextIdx;
+        await loadEpisode(nextIdx);
+        renderEpiDrawer();
+        history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
+      };
+      isThird(nextIdx) ? showAdThen(go) : go();
+    }
+    function prevEpisode(){
+      const story = getStory(currentStoryId); if(!story) return;
+      if(currentEpisodeIndex<=0) return;
+      currentEpisodeIndex--;
+      loadEpisode(currentEpisodeIndex);
+      renderEpiDrawer();
+      history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
+    }
+
+    video.addEventListener("ended", ()=>{ if(!isAdShowing) nextEpisode(); });
+
+    let sy=null,sx=null;
+    videoStage.addEventListener("touchstart",(e)=>{
+      if(!playerOverlay.classList.contains("show")) return;
+      if(isAdShowing) return;
+      if(drawer.classList.contains("open")) return;
+      const t=e.touches[0]; sy=t.clientY; sx=t.clientX;
+    },{passive:true});
+    videoStage.addEventListener("touchend",(e)=>{
+      if(sy==null) return;
+      const t=e.changedTouches?.[0]; if(!t){sy=null;sx=null;return;}
+      const dy=t.clientY-sy, dx=t.clientX-sx; sy=null; sx=null;
+      if(Math.abs(dy)<50) return;
+      if(Math.abs(dx)>Math.abs(dy)*0.75) return;
+      if(dy<0) nextEpisode(); else prevEpisode();
+    },{passive:true});
+
+    episodeBtn.onclick = ()=> drawer.classList.contains("open") ? closeDrawer() : openDrawer();
+    drawerBackdrop.onclick = closeDrawer;
+    drawerCloseBtn.onclick = closeDrawer;
+
+    playerBackBtn.onclick = ()=>{ if(history.state?.view==="player") history.back(); else closePlayer(); };
+
+    navHome.onclick = ()=>goHome({pushHistory:true});
+    navFolders.onclick = ()=>openFolders({pushHistory:true});
+    navApp.onclick = ()=>alert("App (placeholder)");
+    navJoin.onclick = ()=>alert("Join (placeholder)");
+
+    searchInput.addEventListener("input", render);
+    clearBtn.onclick = ()=>{searchInput.value=""; render();};
+
+    window.addEventListener("popstate",(e)=>{
+      const st=e.state||{view:"home"};
+      if(drawer.classList.contains("open")){
+        closeDrawer();
+        if(currentStoryId) history.pushState({view:"player",storyId:currentStoryId,episodeIndex:currentEpisodeIndex},"");
+        else history.pushState({view:"home"},"");
+        return;
+      }
+      if(playerOverlay.classList.contains("show") && st.view!=="player") closePlayer();
+      if(st.view==="folders"){view={mode:"folders",folder:null}; return render();}
+      if(st.view==="folder"){view={mode:"folder",folder:st.folder}; return render();}
+      if(st.view==="player"){
+        if(!playerOverlay.classList.contains("show")) openPlayer(st.storyId, st.episodeIndex||0);
+        return;
+      }
+      view={mode:"home",folder:null}; render();
+    });
+
+    history.replaceState({view:"home"},"");
+    render();
+  </script>
+</body>
+</html>
