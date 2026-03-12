@@ -11,7 +11,7 @@
       --blue:#1e78ff; --line:rgba(148,163,184,.16);
       --shadow:0 10px 25px rgba(0,0,0,.35);
       --r:16px;
-      --bannerH: 60px;
+      --bannerH:60px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -29,7 +29,6 @@
     button,input{font:inherit}
     .app{height:100%;display:flex;flex-direction:column}
 
-    /* Header */
     .header{
       padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
       background:rgba(0,0,0,.30);
@@ -74,7 +73,6 @@
     .clearBtn{border:0;background:transparent;color:rgba(255,255,255,.7);cursor:pointer;display:none}
     .clearBtn.show{display:inline-block}
 
-    /* Content */
     .content{
       flex:1;overflow:auto;
       padding:12px;
@@ -90,7 +88,6 @@
       line-height:1.4;
     }
 
-    /* Banner row */
     .bannerRow{display:flex;gap:10px;overflow:auto;padding-bottom:6px;scrollbar-width:none}
     .bannerRow::-webkit-scrollbar{display:none}
     .banner{
@@ -113,18 +110,7 @@
       text-shadow:0 10px 20px rgba(0,0,0,.6);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis
     }
-    .bannerViews{
-      position:absolute; top:10px; left:10px;
-      padding:6px 9px;
-      border-radius:999px;
-      background:rgba(0,0,0,.40);
-      border:1px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.92);
-      font-size:12px;
-      backdrop-filter: blur(8px);
-    }
 
-    /* Section */
     .section{margin-top:14px}
     .sectionHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .bar{width:4px;height:22px;border-radius:10px;background:var(--blue);box-shadow:0 10px 20px rgba(30,120,255,.25)}
@@ -137,7 +123,6 @@
     .hRow{display:flex;gap:12px;overflow:auto;padding-bottom:4px;scrollbar-width:none}
     .hRow::-webkit-scrollbar{display:none}
 
-    /* Story card */
     .card{
       flex:0 0 auto;width:170px;border-radius:18px;overflow:hidden;
       background:rgba(255,255,255,.04);
@@ -156,7 +141,6 @@
     .cardName{font-weight:800;font-size:14px;line-height:1.2;max-height:2.4em;overflow:hidden}
     .cardMeta{margin-top:8px;color:rgba(154,167,189,.9);font-size:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
-    /* Folder page */
     .pageTop{
       display:flex;align-items:center;gap:10px;margin-bottom:10px;
       position:sticky;top:0;padding:10px 0;
@@ -186,19 +170,7 @@
       background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 70%);
       pointer-events:none
     }
-    .viewsBadge{
-      position:absolute; left:8px; top:8px;
-      padding:6px 9px;
-      border-radius:999px;
-      background:rgba(0,0,0,.40);
-      border:1px solid rgba(255,255,255,.12);
-      color:rgba(255,255,255,.92);
-      font-size:12px;
-      backdrop-filter: blur(8px);
-      z-index:2;
-    }
 
-    /* Bottom nav */
     .bottomNav{
       position:fixed;left:0;right:0;bottom:0;
       padding-bottom:env(safe-area-inset-bottom);
@@ -225,7 +197,6 @@
     .i-app{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>')}
     .i-join{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 2-8 4.5V21h16v-2.5C20 16 16.42 14 12 14z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 2-8 4.5V21h16v-2.5C20 16 16.42 14 12 14z"/></svg>')}
 
-    /* PLAYER */
     .overlay{position:fixed;inset:0;background:#000;display:none;z-index:50;height:100dvh;}
     .overlay.show{display:block}
     .playerWrap{position:absolute;inset:0;display:flex;flex-direction:column;background:#000;overflow:hidden;height:100%;}
@@ -249,7 +220,6 @@
       touch-action:none;
     }
     video{width:100%;height:100%;object-fit:contain;background:#000;}
-
     .playerHUD{position:absolute;inset:0;pointer-events:none}
     .hudTop{
       position:absolute;top:10px;left:10px;right:10px;
@@ -275,7 +245,6 @@
     }
     .hudTopRight{margin-left:auto;pointer-events:none}
     .hudTopRight .hudBtn{pointer-events:auto}
-
     .icon{width:18px;height:18px;display:inline-block;background:currentColor;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center}
     .i-back{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M10.828 12l4.95-4.95-1.414-1.414L8.0 12l6.364 6.364 1.414-1.414z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M10.828 12l4.95-4.95-1.414-1.414L8.0 12l6.364 6.364 1.414-1.414z"/></svg>')}
     .i-list{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>')}
@@ -307,7 +276,7 @@
     }
     .epiItem.active{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.38)}
     .epiMeta b{font-size:14px}
-    .epiMeta span{font-size:12px;color:var(--muted)} /* no URL shown */
+    .epiMeta span{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -341,10 +310,7 @@
 
   <div class="overlay" id="playerOverlay" aria-hidden="true">
     <div class="playerWrap">
-      <!-- TOP banner slot (ad yahin load hoga) -->
-      <div class="adSlot top">
-        <div class="adInner" id="bannerTop"></div>
-      </div>
+      <div class="adSlot top"><div class="adInner" id="bannerTop"></div></div>
 
       <div class="videoStage" id="videoStage">
         <video id="video"
@@ -373,18 +339,14 @@
         </div>
       </div>
 
-      <!-- BOTTOM banner slot (ad yahin load hoga) -->
-      <div class="adSlot bottom">
-        <div class="adInner" id="bannerBottom"></div>
-      </div>
+      <div class="adSlot bottom"><div class="adInner" id="bannerBottom"></div></div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
-      getFirestore, collection, onSnapshot, query, orderBy,
-      doc, updateDoc, increment
+      getFirestore, collection, onSnapshot, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -400,14 +362,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    /* ===== Banner Ad config (your key) ===== */
+    /* ===== Ads always ON ===== */
     const AD_KEY = "54b70585e72a2e594853fc4e1cf0426e";
+    const AD_COOLDOWN_MS = 2500;
     let lastAdRefreshAt = 0;
 
     function mountBannerAd(containerId){
       const box = document.getElementById(containerId);
       if (!box) return;
-
       box.innerHTML = "";
 
       const fr = document.createElement("iframe");
@@ -419,8 +381,10 @@
       fr.style.display = "block";
       fr.style.background = "transparent";
 
-      // Some ad scripts need same-origin inside srcdoc
-      fr.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation");
+      fr.setAttribute(
+        "sandbox",
+        "allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation"
+      );
 
       fr.srcdoc = `
 <!doctype html><html><head>
@@ -439,20 +403,17 @@
 <\/script>
 <script src="https://www.highperformanceformat.com/${AD_KEY}/invoke.js"><\/script>
 </body></html>`;
-
       box.appendChild(fr);
     }
 
     function refreshBannerAds(force=false){
       const now = Date.now();
-      if (!force && (now - lastAdRefreshAt) < 2500) return; // cooldown
+      if (!force && (now - lastAdRefreshAt) < AD_COOLDOWN_MS) return;
       lastAdRefreshAt = now;
-
       mountBannerAd("bannerTop");
       mountBannerAd("bannerBottom");
     }
 
-    /* ===== App refs ===== */
     const content = document.getElementById("content");
     const countPill = document.getElementById("countPill");
     const searchInput = document.getElementById("searchInput");
@@ -490,9 +451,7 @@
     function setOverlay(el,on){el.classList.toggle("show",!!on); el.setAttribute("aria-hidden", on?"false":"true");}
     function getStory(id){return stories.find(s=>s.id===id)||null;}
     function getFolders(){return [...new Set(stories.map(s=>normFolder(s.folderName)))].sort((a,b)=>a.localeCompare(b));}
-    function viewsOf(s){ return Number(s?.views || 0) || 0; }
 
-    // Firestore realtime read
     const storiesCol = collection(db, "stories");
     const qy = query(storiesCol, orderBy("updatedAt", "desc"));
     onSnapshot(qy, (snap) => {
@@ -505,12 +464,11 @@
       ({home:navHome, folders:navFolders, app:navApp, join:navJoin}[which]||navHome).classList.add("active");
     }
 
-    // Archive auto-direct
     function extractUrlFromMaybeIframe(input) {
       const s = (input || "").trim();
       if (!s) return "";
       if (!s.includes("<iframe")) return s;
-      const m = s.match(/src\s*=\s*["']([^"']+)["']/i);
+      const m = s.match(/src\\s*=\\s*["']([^"']+)["']/i);
       return m ? m[1] : s;
     }
 
@@ -546,19 +504,6 @@
       return u;
     }
 
-    // Views increment (soft throttle)
-    async function bumpView(storyId){
-      try{
-        const key = "kp_view_" + storyId;
-        const last = Number(sessionStorage.getItem(key) || 0);
-        const now = Date.now();
-        if (now - last < 60_000) return;
-        sessionStorage.setItem(key, String(now));
-        await updateDoc(doc(db, "stories", storyId), { views: increment(1) });
-      }catch(e){}
-    }
-
-    // UI
     function render(){
       countPill.textContent = `${stories.length} Stories`;
       const q = (searchInput.value||"").trim().toLowerCase();
@@ -688,7 +633,6 @@
       el.className="banner";
       el.innerHTML = `
         <img alt="banner" loading="lazy" referrerpolicy="no-referrer" src="${esc(s.posterUrl||"")}">
-        <div class="bannerViews">👁 ${viewsOf(s)}</div>
         <div class="bannerTitle">${esc(s.storyName||"Story")}</div>
       `;
       el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
@@ -706,7 +650,6 @@
           <div class="cardName">${esc(s.storyName||"Story")}</div>
           <div class="cardMeta">
             <span>📁 ${esc(normFolder(s.folderName))}</span>
-            <span>👁 ${viewsOf(s)}</span>
           </div>
         </div>
       `;
@@ -719,7 +662,6 @@
       el.className="posterTile";
       el.innerHTML = `
         <img alt="poster" loading="lazy" referrerpolicy="no-referrer" src="${esc(s.posterUrl||"")}">
-        <div class="viewsBadge">👁 ${viewsOf(s)}</div>
       `;
       el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
       return el;
@@ -741,7 +683,6 @@
       render();
     }
 
-    // Player
     function openDrawer(){drawerBackdrop.classList.add("show"); drawer.classList.add("open")}
     function closeDrawer(){drawerBackdrop.classList.remove("show"); drawer.classList.remove("open")}
 
@@ -794,7 +735,6 @@
       video.autoplay = true;
       const p = video.play(); if(p?.catch) p.catch(()=>{});
 
-      // हर episode change पर banner ad reload (change)
       refreshBannerAds(false);
     }
 
@@ -805,14 +745,11 @@
       currentStoryId = storyId;
       currentEpisodeIndex = Math.max(0, Math.min(story.episodes.length-1, episodeIndex));
 
-      bumpView(storyId);
-
       setOverlay(playerOverlay,true);
       closeDrawer();
       renderEpiDrawer();
       loadEpisode(currentEpisodeIndex);
 
-      // player open पर ads initial load (force)
       refreshBannerAds(true);
 
       if(pushHistory) history.pushState({view:"player", storyId, episodeIndex: currentEpisodeIndex},"");
@@ -845,7 +782,6 @@
 
     video.addEventListener("ended", ()=> nextEpisode());
 
-    // swipe up/down
     let sy=null,sx=null;
     videoStage.addEventListener("touchstart",(e)=>{
       if(!playerOverlay.classList.contains("show")) return;
