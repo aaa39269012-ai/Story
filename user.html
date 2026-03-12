@@ -29,6 +29,7 @@
     button,input{font:inherit}
     .app{height:100%;display:flex;flex-direction:column}
 
+    /* Header */
     .header{
       padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
       background:rgba(0,0,0,.30);
@@ -73,6 +74,7 @@
     .clearBtn{border:0;background:transparent;color:rgba(255,255,255,.7);cursor:pointer;display:none}
     .clearBtn.show{display:inline-block}
 
+    /* Content */
     .content{
       flex:1;overflow:auto;
       padding:12px;
@@ -88,6 +90,7 @@
       line-height:1.4;
     }
 
+    /* Banner row */
     .bannerRow{display:flex;gap:10px;overflow:auto;padding-bottom:6px;scrollbar-width:none}
     .bannerRow::-webkit-scrollbar{display:none}
     .banner{
@@ -110,7 +113,18 @@
       text-shadow:0 10px 20px rgba(0,0,0,.6);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis
     }
+    .bannerViews{
+      position:absolute; top:10px; left:10px;
+      padding:6px 9px;
+      border-radius:999px;
+      background:rgba(0,0,0,.40);
+      border:1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.92);
+      font-size:12px;
+      backdrop-filter: blur(8px);
+    }
 
+    /* Section */
     .section{margin-top:14px}
     .sectionHead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .bar{width:4px;height:22px;border-radius:10px;background:var(--blue);box-shadow:0 10px 20px rgba(30,120,255,.25)}
@@ -123,6 +137,7 @@
     .hRow{display:flex;gap:12px;overflow:auto;padding-bottom:4px;scrollbar-width:none}
     .hRow::-webkit-scrollbar{display:none}
 
+    /* Story card */
     .card{
       flex:0 0 auto;width:170px;border-radius:18px;overflow:hidden;
       background:rgba(255,255,255,.04);
@@ -139,8 +154,9 @@
     }
     .cardBody{padding:10px 10px 12px}
     .cardName{font-weight:800;font-size:14px;line-height:1.2;max-height:2.4em;overflow:hidden}
-    .cardMeta{margin-top:8px;color:rgba(154,167,189,.9);font-size:12px;display:flex;gap:8px;align-items:center}
+    .cardMeta{margin-top:8px;color:rgba(154,167,189,.9);font-size:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
+    /* Folder page */
     .pageTop{
       display:flex;align-items:center;gap:10px;margin-bottom:10px;
       position:sticky;top:0;padding:10px 0;
@@ -170,7 +186,19 @@
       background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 70%);
       pointer-events:none
     }
+    .viewsBadge{
+      position:absolute; left:8px; top:8px;
+      padding:6px 9px;
+      border-radius:999px;
+      background:rgba(0,0,0,.40);
+      border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.92);
+      font-size:12px;
+      backdrop-filter: blur(8px);
+      z-index:2;
+    }
 
+    /* Bottom nav */
     .bottomNav{
       position:fixed;left:0;right:0;bottom:0;
       padding-bottom:env(safe-area-inset-bottom);
@@ -208,9 +236,11 @@
       width: min(468px, calc(100vw - 20px));
       height: var(--bannerH);
       display:flex;align-items:center;justify-content:center;
-      border-radius: 12px;border:1px dashed rgba(148,163,184,.25);
-      color: rgba(154,167,189,.85);
-      font-size: 12px; user-select:none; margin:0 10px;
+      border-radius: 12px;
+      overflow:hidden;
+      margin:0 10px;
+      background: rgba(0,0,0,.15);
+      border: 1px dashed rgba(148,163,184,.20);
     }
     .videoStage{
       position:relative;overflow:hidden;background:#000;
@@ -278,12 +308,6 @@
     .epiItem.active{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.38)}
     .epiMeta b{font-size:14px}
     .epiMeta span{font-size:12px;color:var(--muted)} /* no URL shown */
-
-    .ad{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8);z-index:20}
-    .ad.show{display:flex}
-    .adBox{width:min(520px,92vw);border-radius:18px;background:rgba(17,24,39,.95);border:1px solid rgba(148,163,184,.2);box-shadow:var(--shadow);padding:16px}
-    .adTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-    .adHint{color:var(--muted);font-size:12px;line-height:1.35}
   </style>
 </head>
 <body>
@@ -317,7 +341,10 @@
 
   <div class="overlay" id="playerOverlay" aria-hidden="true">
     <div class="playerWrap">
-      <div class="adSlot top"><div class="adInner">Top Banner 468×60</div></div>
+      <!-- TOP banner slot (ad yahin load hoga) -->
+      <div class="adSlot top">
+        <div class="adInner" id="bannerTop"></div>
+      </div>
 
       <div class="videoStage" id="videoStage">
         <video id="video"
@@ -344,27 +371,20 @@
           </div>
           <div class="epiList" id="epiList"></div>
         </div>
-
-        <div class="ad" id="adOverlay">
-          <div class="adBox">
-            <div class="adTop">
-              <b>Ad</b>
-              <div class="pill" id="adTimer">5s</div>
-            </div>
-            <div class="adHint">Har 3rd episode par ad (demo placeholder).</div>
-          </div>
-        </div>
       </div>
 
-      <div class="adSlot bottom"><div class="adInner">Bottom Banner 468×60</div></div>
+      <!-- BOTTOM banner slot (ad yahin load hoga) -->
+      <div class="adSlot bottom">
+        <div class="adInner" id="bannerBottom"></div>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
     import {
-      getFirestore, collection, onSnapshot, query, orderBy
+      getFirestore, collection, onSnapshot, query, orderBy,
+      doc, updateDoc, increment
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -378,9 +398,61 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    try { getAnalytics(app); } catch(e) {}
     const db = getFirestore(app);
 
+    /* ===== Banner Ad config (your key) ===== */
+    const AD_KEY = "54b70585e72a2e594853fc4e1cf0426e";
+    let lastAdRefreshAt = 0;
+
+    function mountBannerAd(containerId){
+      const box = document.getElementById(containerId);
+      if (!box) return;
+
+      box.innerHTML = "";
+
+      const fr = document.createElement("iframe");
+      fr.width = "468";
+      fr.height = "60";
+      fr.style.width = "min(468px, 100%)";
+      fr.style.height = "60px";
+      fr.style.border = "0";
+      fr.style.display = "block";
+      fr.style.background = "transparent";
+
+      // Some ad scripts need same-origin inside srcdoc
+      fr.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation");
+
+      fr.srcdoc = `
+<!doctype html><html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;overflow:hidden;background:transparent;">
+<script>
+  var atOptions = {
+    'key' : '${AD_KEY}',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+<\/script>
+<script src="https://www.highperformanceformat.com/${AD_KEY}/invoke.js"><\/script>
+</body></html>`;
+
+      box.appendChild(fr);
+    }
+
+    function refreshBannerAds(force=false){
+      const now = Date.now();
+      if (!force && (now - lastAdRefreshAt) < 2500) return; // cooldown
+      lastAdRefreshAt = now;
+
+      mountBannerAd("bannerTop");
+      mountBannerAd("bannerBottom");
+    }
+
+    /* ===== App refs ===== */
     const content = document.getElementById("content");
     const countPill = document.getElementById("countPill");
     const searchInput = document.getElementById("searchInput");
@@ -404,17 +476,12 @@
     const drawerTitle = document.getElementById("drawerTitle");
     const epiList = document.getElementById("epiList");
 
-    const adOverlay = document.getElementById("adOverlay");
-    const adTimer = document.getElementById("adTimer");
-
     video.addEventListener("contextmenu", (e)=>e.preventDefault());
 
     let stories = [];
     let view = { mode:"home", folder:null };
     let currentStoryId = null;
     let currentEpisodeIndex = 0;
-    let isAdShowing = false;
-    let adInterval = null;
 
     const resolvedCache = new Map();
 
@@ -423,8 +490,9 @@
     function setOverlay(el,on){el.classList.toggle("show",!!on); el.setAttribute("aria-hidden", on?"false":"true");}
     function getStory(id){return stories.find(s=>s.id===id)||null;}
     function getFolders(){return [...new Set(stories.map(s=>normFolder(s.folderName)))].sort((a,b)=>a.localeCompare(b));}
+    function viewsOf(s){ return Number(s?.views || 0) || 0; }
 
-    // Firestore realtime
+    // Firestore realtime read
     const storiesCol = collection(db, "stories");
     const qy = query(storiesCol, orderBy("updatedAt", "desc"));
     onSnapshot(qy, (snap) => {
@@ -449,7 +517,6 @@
     async function resolvePlayableUrl(inputUrl){
       let u = extractUrlFromMaybeIframe(inputUrl);
       if (!u) return u;
-
       if (resolvedCache.has(u)) return resolvedCache.get(u);
 
       if (/\.(mp4|webm|ogg|m3u8)(\?.*)?$/i.test(u)) {
@@ -476,8 +543,19 @@
         resolvedCache.set(u, direct);
         return direct;
       }
-
       return u;
+    }
+
+    // Views increment (soft throttle)
+    async function bumpView(storyId){
+      try{
+        const key = "kp_view_" + storyId;
+        const last = Number(sessionStorage.getItem(key) || 0);
+        const now = Date.now();
+        if (now - last < 60_000) return;
+        sessionStorage.setItem(key, String(now));
+        await updateDoc(doc(db, "stories", storyId), { views: increment(1) });
+      }catch(e){}
     }
 
     // UI
@@ -608,27 +686,41 @@
     function banner(s){
       const el = document.createElement("div");
       el.className="banner";
-      el.innerHTML = `<img alt="banner" loading="lazy" src="${esc(s.posterUrl||"")}"><div class="bannerTitle">${esc(s.storyName||"Story")}</div>`;
+      el.innerHTML = `
+        <img alt="banner" loading="lazy" referrerpolicy="no-referrer" src="${esc(s.posterUrl||"")}">
+        <div class="bannerViews">👁 ${viewsOf(s)}</div>
+        <div class="bannerTitle">${esc(s.storyName||"Story")}</div>
+      `;
       el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
       return el;
     }
+
     function card(s){
       const el = document.createElement("div");
       el.className="card";
       el.innerHTML = `
-        <div class="cardPoster"><img alt="poster" loading="lazy" src="${esc(s.posterUrl||"")}"></div>
+        <div class="cardPoster">
+          <img alt="poster" loading="lazy" referrerpolicy="no-referrer" src="${esc(s.posterUrl||"")}">
+        </div>
         <div class="cardBody">
           <div class="cardName">${esc(s.storyName||"Story")}</div>
-          <div class="cardMeta"><span>📁 ${esc(normFolder(s.folderName))}</span></div>
+          <div class="cardMeta">
+            <span>📁 ${esc(normFolder(s.folderName))}</span>
+            <span>👁 ${viewsOf(s)}</span>
+          </div>
         </div>
       `;
       el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
       return el;
     }
+
     function posterTile(s){
       const el = document.createElement("div");
       el.className="posterTile";
-      el.innerHTML = `<img alt="poster" loading="lazy" src="${esc(s.posterUrl||"")}">`;
+      el.innerHTML = `
+        <img alt="poster" loading="lazy" referrerpolicy="no-referrer" src="${esc(s.posterUrl||"")}">
+        <div class="viewsBadge">👁 ${viewsOf(s)}</div>
+      `;
       el.onclick = ()=>openPlayer(s.id,0,{pushHistory:true});
       return el;
     }
@@ -650,32 +742,14 @@
     }
 
     // Player
-    function isThird(i){return ((i+1)%3)===0}
     function openDrawer(){drawerBackdrop.classList.add("show"); drawer.classList.add("open")}
     function closeDrawer(){drawerBackdrop.classList.remove("show"); drawer.classList.remove("open")}
-
-    function showAdThen(cb){
-      if(isAdShowing) return;
-      isAdShowing=true;
-      try{video.pause()}catch{}
-      setOverlay(adOverlay,true);
-      let t=5; adTimer.textContent=t+"s";
-      adInterval=setInterval(()=>{
-        t--; adTimer.textContent=t+"s";
-        if(t<=0){clearInterval(adInterval); adInterval=null; stopAd(); cb && cb();}
-      },1000);
-    }
-    function stopAd(){
-      isAdShowing=false;
-      setOverlay(adOverlay,false);
-      if(adInterval){clearInterval(adInterval); adInterval=null}
-    }
 
     function renderEpiDrawer(){
       const story = getStory(currentStoryId); if(!story) return;
       drawerTitle.textContent = story.storyName || "Episodes";
       epiList.innerHTML = "";
-      story.episodes.forEach((ep, idx) => {
+      (story.episodes||[]).forEach((ep, idx) => {
         const item = document.createElement("div");
         item.className = "epiItem" + (idx===currentEpisodeIndex ? " active" : "");
         item.innerHTML = `
@@ -685,15 +759,12 @@
           </div>
           <div class="pill">Play</div>
         `;
-        item.onclick = () => {
-          const go = async () => {
-            currentEpisodeIndex = idx;
-            await loadEpisode(idx);
-            renderEpiDrawer();
-            closeDrawer();
-            history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
-          };
-          isThird(idx) ? showAdThen(go) : go();
+        item.onclick = async () => {
+          currentEpisodeIndex = idx;
+          await loadEpisode(idx);
+          renderEpiDrawer();
+          closeDrawer();
+          history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
         };
         epiList.appendChild(item);
       });
@@ -722,24 +793,34 @@
       video.src = playable;
       video.autoplay = true;
       const p = video.play(); if(p?.catch) p.catch(()=>{});
+
+      // हर episode change पर banner ad reload (change)
+      refreshBannerAds(false);
     }
 
     function openPlayer(storyId, episodeIndex=0, {pushHistory=false}={}){
       const story = getStory(storyId);
       if(!story || !story.episodes?.length) return alert("Is story me episodes nahi hain.");
+
       currentStoryId = storyId;
       currentEpisodeIndex = Math.max(0, Math.min(story.episodes.length-1, episodeIndex));
+
+      bumpView(storyId);
+
       setOverlay(playerOverlay,true);
       closeDrawer();
       renderEpiDrawer();
       loadEpisode(currentEpisodeIndex);
+
+      // player open पर ads initial load (force)
+      refreshBannerAds(true);
+
       if(pushHistory) history.pushState({view:"player", storyId, episodeIndex: currentEpisodeIndex},"");
     }
 
     function closePlayer(){
       setOverlay(playerOverlay,false);
       closeDrawer();
-      stopAd();
       try{video.pause()}catch{}
       video.removeAttribute("src"); video.load();
       currentStoryId=null; currentEpisodeIndex=0;
@@ -748,14 +829,10 @@
     function nextEpisode(){
       const story = getStory(currentStoryId); if(!story) return;
       if(currentEpisodeIndex>=story.episodes.length-1) return;
-      const nextIdx = currentEpisodeIndex+1;
-      const go = async () => {
-        currentEpisodeIndex = nextIdx;
-        await loadEpisode(nextIdx);
-        renderEpiDrawer();
-        history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
-      };
-      isThird(nextIdx) ? showAdThen(go) : go();
+      currentEpisodeIndex++;
+      loadEpisode(currentEpisodeIndex);
+      renderEpiDrawer();
+      history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
     }
     function prevEpisode(){
       const story = getStory(currentStoryId); if(!story) return;
@@ -766,12 +843,12 @@
       history.replaceState({view:"player", storyId: currentStoryId, episodeIndex: currentEpisodeIndex},"");
     }
 
-    video.addEventListener("ended", ()=>{ if(!isAdShowing) nextEpisode(); });
+    video.addEventListener("ended", ()=> nextEpisode());
 
+    // swipe up/down
     let sy=null,sx=null;
     videoStage.addEventListener("touchstart",(e)=>{
       if(!playerOverlay.classList.contains("show")) return;
-      if(isAdShowing) return;
       if(drawer.classList.contains("open")) return;
       const t=e.touches[0]; sy=t.clientY; sx=t.clientX;
     },{passive:true});
