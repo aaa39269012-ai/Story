@@ -120,6 +120,7 @@
     }
     .grid{ display:grid; grid-template-columns: 1fr; gap: 10px; }
     @media (min-width:860px){ .grid{ grid-template-columns: 1fr 1fr; } }
+
     .card{
       background: var(--card);
       border: 1px solid rgba(255,255,255,.10);
@@ -154,13 +155,20 @@
     }
     .info .meta{
       margin-top:5px;
-      display:block;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
       color: var(--muted);
       font-size: 12px;
-      overflow:hidden;
-      text-overflow:ellipsis;
+    }
+    .meta .tag{
+      padding:5px 9px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.16);
+      background: rgba(148,163,184,.08);
       white-space:nowrap;
     }
+
     .actions{ margin-top: 10px; display:flex; gap:8px; flex-wrap:wrap; }
     .btn{
       padding: 9px 11px;
@@ -329,7 +337,10 @@
       <div class="spacer"></div>
 
       <div class="pill" id="countPill">0 Stories</div>
-      <a class="pill" href="user.html">Open User</a>
+
+      <!-- Open User (button + JS) -->
+      <button class="pill" id="openUserBtn" type="button">Open User</button>
+
       <button class="iconBtn primary" id="openSheetBtn" title="Add Story">＋</button>
       <button class="iconBtn" id="logoutBtn" title="Logout">⎋</button>
     </div>
@@ -392,7 +403,7 @@
     </div>
   </div>
 
-  <!-- Login Modal: only "Username" and "Password" (no Deepak/Firebase text) -->
+  <!-- Login Modal: only Username/Password (no hints) -->
   <div class="modal" id="loginModal">
     <div class="modalBox">
       <div class="modalTop">
@@ -417,7 +428,6 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
     import {
       getFirestore, collection, addDoc, doc, updateDoc, deleteDoc,
       onSnapshot, query, orderBy, serverTimestamp, getDocs, writeBatch
@@ -439,16 +449,16 @@
     };
 
     // Login requirement:
-    // Username must be Deepak, Password = your Firebase Auth password
+    // Username must be Deepak, Password = Firebase Auth password
     const ADMIN_USERNAME = "Deepak";
     const FB_EMAIL = "aaa39269012@gmail.com";
 
     const app = initializeApp(firebaseConfig);
-    try { getAnalytics(app); } catch(e) {}
     const db = getFirestore(app);
     const auth = getAuth(app);
 
     // UI refs
+    const openUserBtn = document.getElementById("openUserBtn");
     const countPill = document.getElementById("countPill");
     const logoutBtn = document.getElementById("logoutBtn");
     const searchInput = document.getElementById("searchInput");
@@ -489,6 +499,12 @@
 
     function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));}
     function normFolder(f){f=(f||"").trim(); return f?f:"Default";}
+    function viewsOf(s){ return Number(s?.views || 0) || 0; }
+
+    // Open user reliably
+    openUserBtn.addEventListener("click", () => {
+      window.location.assign("./user.html");
+    });
 
     function openSheet(title){
       sheetTitle.textContent = title || "Add Story";
@@ -584,12 +600,19 @@
       filtered.forEach(s=>{
         const wrap = document.createElement("div");
         wrap.className = "card";
+
         wrap.innerHTML = `
           <div class="storyItem">
-            <div class="thumb"><img alt="thumb" src="${esc(s.posterUrl||"")}"></div>
+            <div class="thumb">
+              <img alt="thumb" loading="lazy" referrerpolicy="no-referrer" src="${esc(s.posterUrl||"")}">
+            </div>
             <div class="info">
               <b>${esc(s.storyName || "(No name)")}</b>
-              <span class="meta">Folder: ${esc(normFolder(s.folderName))} • Episodes: ${s.episodes?.length || 0}</span>
+              <div class="meta">
+                <span class="tag">📁 ${esc(normFolder(s.folderName))}</span>
+                <span class="tag">🎬 ${s.episodes?.length || 0}</span>
+                <span class="tag">👁 ${viewsOf(s)}</span>
+              </div>
               <div class="actions">
                 <button class="btn" data-act="edit" type="button">Edit</button>
                 <button class="btn danger" data-act="del" type="button">Delete</button>
@@ -597,14 +620,17 @@
             </div>
           </div>
         `;
+
         wrap.querySelector('[data-act="edit"]').onclick = () => {
           loadIntoForm(s);
           openSheet("Edit Story");
         };
+
         wrap.querySelector('[data-act="del"]').onclick = async () => {
           if(!confirm("Is story ko delete karein?")) return;
           await deleteDoc(doc(db, "stories", s.id));
         };
+
         list.appendChild(wrap);
       });
     }
@@ -671,6 +697,7 @@
       const id = editingId.value.trim();
 
       if (id) {
+        // IMPORTANT: views field is not touched here (so views never reset)
         await updateDoc(doc(db, "stories", id), {
           folderName: f,
           storyName: name,
@@ -684,6 +711,7 @@
           storyName: name,
           posterUrl: poster,
           episodes,
+          views: 0,                 // initialize views
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
@@ -703,7 +731,7 @@
       await signOut(auth);
     };
 
-    // LOGIN: Username must be Deepak, Password = Firebase password (but UI only says "Password")
+    // LOGIN: Username must be Deepak, Password = Firebase Auth password
     async function doLogin(){
       loginErr.classList.remove("show");
       loginStatus.textContent = "Signing in...";
@@ -738,7 +766,6 @@
       const ok = !!user;
       loginModal.classList.toggle("show", !ok);
 
-      // ensure fields never show default values
       if (!ok) {
         loginUser.value = "";
         loginPass.value = "";
@@ -752,4 +779,4 @@
     resetForm();
   </script>
 </body>
-</html>
+  </html>
