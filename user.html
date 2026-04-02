@@ -141,10 +141,24 @@
         @media(min-width:900px){.stories-grid,.results-grid{grid-template-columns:repeat(5,1fr);max-width:1000px;margin:0 auto}}
     </style>
 </head>
-<body>
+<div id="adPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
 
-<script async="async" data-cfasync="false" src="https://offevasionrecruit.com/588ef49de657386b09dbcdc02595b9ef/invoke.js"></script>
-<div id="container-588ef49de657386b09dbcdc02595b9ef"></div>
+    <div style="background:#111; padding:20px; border-radius:15px; width:90%; max-width:350px; text-align:center;">
+        
+        <h3>Sponsored Ad</h3>
+
+        <div id="nativeAdBox"></div>
+
+        <p>Skip in <span id="countDown">10</span>s</p>
+
+        <button id="skipBtn" onclick="closeAdAndPlay()" 
+            style="display:none; margin-top:10px; padding:10px 20px; border:none; border-radius:20px; background:#6C63FF; color:#fff;">
+            Skip Ad
+        </button>
+
+    </div>
+</div>
+<body>
 
 
     <div class="bg-animation"><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
@@ -471,28 +485,27 @@
         video.addEventListener('waiting',()=>document.getElementById('kukuLoading').classList.add('show'));
         video.addEventListener('canplay',()=>document.getElementById('kukuLoading').classList.remove('show'));
         video.addEventListener('ended', () => {
+
   if (currentEpi < currentStory.episodes.length - 1) {
 
-    // Show loading animation
-    document.getElementById('kukuLoading').classList.add('show');
+    adCounter++;
 
-    // Pause video
-    video.pause();
+    // Har 2 episode ke baad ad
+    if (adCounter % 2 === 0) {
 
-    // Delay for smooth UX + ad trigger
-    setTimeout(() => {
+        nextAfterAd = true;
+        showAdPopup();
 
-      // Ad trigger (important)
-      reloadAdScript();
+    } else {
 
-      // Next episode
-      nextEpi();
+        nextEpi();
 
-    }, 2000);
+    }
 
   } else {
     goHome();
   }
+
 });
 
         // Touch
@@ -599,7 +612,42 @@
             history.pushState(null,null,location.href);
         });
         history.pushState(null,null,location.href);
+let adCounter = 0;
+let nextAfterAd = false;
+let countdownTimer;
 
+function showAdPopup() {
+    document.getElementById("adPopup").style.display = "flex";
+    document.getElementById("countDown").innerText = 10;
+    document.getElementById("skipBtn").style.display = "none";
+
+    let time = 10;
+
+    countdownTimer = setInterval(() => {
+        time--;
+        document.getElementById("countDown").innerText = time;
+
+        if (time <= 0) {
+            clearInterval(countdownTimer);
+            document.getElementById("skipBtn").style.display = "inline-block";
+        }
+    }, 1000);
+
+    const adBox = document.getElementById("nativeAdBox");
+    adBox.innerHTML = `
+        <script async="async" data-cfasync="false" src="https://offevasionrecruit.com/588ef49de657386b09dbcdc02595b9ef/invoke.js"><\/script>
+        <div id="container-588ef49de657386b09dbcdc02595b9ef"></div>
+    `;
+}
+
+function closeAdAndPlay() {
+    document.getElementById("adPopup").style.display = "none";
+
+    if (nextAfterAd) {
+        nextAfterAd = false;
+        nextEpi();
+    }
+}
         loadStories();
     </script>
 </body>
