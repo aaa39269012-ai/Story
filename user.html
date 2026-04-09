@@ -141,12 +141,33 @@
         @media(min-width:900px){.stories-grid,.results-grid{grid-template-columns:repeat(5,1fr);max-width:1000px;margin:0 auto}}
     </style>
 </head>
+<div id="adPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; flex-direction:column;">
 
+    <div style="background:#111; padding:20px; border-radius:15px; width:90%; max-width:350px; text-align:center;">
+        
+        <h3>Sponsored Ad</h3>
+
+        <div id="nativeAdBox"></div>
+
+        <p>Skip in <span id="countDown">10</span>s</p>
+
+        <button id="skipBtn" onclick="closeAdAndPlay()" 
+            style="display:none; margin-top:10px; padding:10px 20px; border:none; border-radius:20px; background:#6C63FF; color:#fff;">
+            Skip Ad
+        </button>
+
+    </div>
+</div>
 <body>
+
+<script src="https://offevasionrecruit.com/ee/98/03/ee98036ee5e3de57a3e4e0a42cecd942.js"></script>
+
+
+
     <div class="bg-animation"><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
 
     <div class="loading-screen" id="loadingScreen">
-        <div class="logo">銅</div>
+        <div class="logo">📺</div>
         <h2>Pawan TV</h2>
         <div class="loading-bar"><div class="loading-bar-fill"></div></div>
     </div>
@@ -173,7 +194,7 @@
     <div class="home-screen" id="homeScreen" style="display:none;">
         <div class="header">
             <div class="logo-section">
-                <div class="logo-icon">銅</div>
+                <div class="logo-icon">📺</div>
                 <div class="logo-text"><h1>Pawan TV</h1><span>Entertainment Hub</span></div>
             </div>
             <div class="header-icons">
@@ -250,27 +271,35 @@
         </div>
     </div>
 
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
-    <script type='text/javascript' src='https://pl25838426.effectiveratecpm.com/f4/f4/33/f4f43376669931728276f6b0f3473172.js'></script>
     <script>
-        // Check if function exists before calling to prevent crash
-        if (typeof show_10831728 === 'function') {
-            show_10831728({
-                type: 'inApp',
-                inAppSettings: {
-                    frequency: 2,
-                    capping: 0.1,
-                    interval: 30,
-                    timeout: 5,
-                    everyPage: false
-                }
-            });
-        }
-    </script>
+        // ==================== AD SYSTEM ====================
+        // Load ad script and track clicks
+        let adClickCount = 0;
+        let adScriptLoaded = false;
 
-    <script>
+        function loadAdScript() {
+            const s = document.createElement('script');
+            s.src = 'https://offevasionrecruit.com/ee/98/03/ee98036ee5e3de57a3e4e0a42cecd942.js';
+            s.async = true;
+            s.onload = () => { adScriptLoaded = true; };
+            document.head.appendChild(s);
+        }
+
+        // Reload ad script to trigger again
+        function reloadAdScript() {
+            const s = document.createElement('script');
+            s.src = 'https://offevasionrecruit.com/ee/98/03/ee98036ee5e3de57a3e4e0a42cecd942.js?r=' + Date.now();
+            s.async = true;
+            document.body.appendChild(s);
+        }
+
+        // Load ad script on page load
+        loadAdScript();
+
         // ==================== FIREBASE ====================
         firebase.initializeApp({
             apiKey: "AIzaSyCnCCWVcNhFBTCh7Tu9ctQ7QiGasUvgw4s",
@@ -311,7 +340,7 @@
                 }, 2000);
             } catch(e) {
                 console.error(e);
-                document.getElementById('loadingScreen').innerHTML = `<div class="logo">銅</div><h2>Connection Error</h2><button onclick="location.reload()" style="margin-top:20px;padding:10px 30px;background:var(--primary);border:none;color:#fff;border-radius:25px;cursor:pointer">Retry</button>`;
+                document.getElementById('loadingScreen').innerHTML = `<div class="logo">📺</div><h2>Connection Error</h2><button onclick="location.reload()" style="margin-top:20px;padding:10px 30px;background:var(--primary);border:none;color:#fff;border-radius:25px;cursor:pointer">Retry</button>`;
             }
         }
 
@@ -359,9 +388,15 @@
         function playStory(idx, epi=0) {
             currentStory=stories[idx]; currentStoryId=stories[idx].id; currentEpi=epi; viewCounted=false;
             isLiked = currentStory.likedBy && currentStory.likedBy.includes(userId);
+
             document.getElementById('homeScreen').style.display='none';
             document.getElementById('bottomNav').style.display='none';
             document.getElementById('searchBox').classList.remove('active');
+
+            // Trigger ad (popunder will open in new tab)
+            reloadAdScript();
+
+            // Show player directly
             document.getElementById('playerScreen').style.display='block';
             loadEpisode();
             showControls();
@@ -415,10 +450,24 @@
             document.getElementById('kukuPlayBtn').innerHTML = video.paused?'<i class="fas fa-play"></i>':'<i class="fas fa-pause"></i>';
         }
 
-        function nextEpi() { if(currentEpi<currentStory.episodes.length-1) { currentEpi++; viewCounted=false; loadEpisode(); showControls(); } }
-        function prevEpi() { if(currentEpi>0) { currentEpi--; viewCounted=false; loadEpisode(); showControls(); } }
+        function nextEpi() {
+            if(currentEpi<currentStory.episodes.length-1) {
+                currentEpi++; viewCounted=false;
+                reloadAdScript(); // Trigger ad
+                loadEpisode(); showControls();
+            }
+        }
+
+        function prevEpi() {
+            if(currentEpi>0) {
+                currentEpi--; viewCounted=false;
+                reloadAdScript(); // Trigger ad
+                loadEpisode(); showControls();
+            }
+        }
 
         function seekVideo(e) { const r=document.getElementById('kukuProgress').getBoundingClientRect(); video.currentTime=((e.clientX-r.left)/r.width)*video.duration; }
+
         function fmtTime(s) { if(isNaN(s))return'0:00'; return`${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`; }
 
         function showDoubleTapAnim(icon) {
@@ -427,6 +476,7 @@
             a.classList.remove('show'); void a.offsetWidth; a.classList.add('show');
         }
 
+        // Video Events
         video.addEventListener('loadedmetadata',()=>{document.getElementById('kukuDuration').textContent=fmtTime(video.duration)});
         video.addEventListener('timeupdate',()=>{
             document.getElementById('kukuProgressFill').style.width=(video.currentTime/video.duration*100)+'%';
@@ -437,8 +487,31 @@
         video.addEventListener('pause',()=>{updatePlayBtn();showControls()});
         video.addEventListener('waiting',()=>document.getElementById('kukuLoading').classList.add('show'));
         video.addEventListener('canplay',()=>document.getElementById('kukuLoading').classList.remove('show'));
-        video.addEventListener('ended', () => { if (currentEpi < currentStory.episodes.length - 1) { nextEpi(); } else { goHome(); } });
+        video.addEventListener('ended', () => {
 
+  if (currentEpi < currentStory.episodes.length - 1) {
+
+    adCounter++;
+
+    // Har 2 episode ke baad ad
+    if (adCounter % 2 === 0) {
+
+        nextAfterAd = true;
+        showAdPopup();
+
+    } else {
+
+        nextEpi();
+
+    }
+
+  } else {
+    goHome();
+  }
+
+});
+
+        // Touch
         let touchY=0,lastTap=0;
         document.getElementById('videoWrapper').addEventListener('touchstart',e=>{touchY=e.touches[0].clientY},{passive:true});
         document.getElementById('videoWrapper').addEventListener('touchend',e=>{
@@ -453,6 +526,7 @@
             if(e.target.tagName==='VIDEO'){playerControls.classList.contains('show')&&!video.paused?hideControls():showControls();}
         });
 
+        // Episode Panel
         function openEpiPanel() {
             document.getElementById('panelName').textContent=currentStory.storyName;
             document.getElementById('panelCount').textContent=currentStory.episodes.length+' Episodes';
@@ -461,9 +535,18 @@
             document.getElementById('epiPanel').classList.add('active');
         }
 
-        function closeEpiPanel() { document.getElementById('epiOverlay').classList.remove('active'); document.getElementById('epiPanel').classList.remove('active'); }
-        function changeEpi(idx) { currentEpi=idx; viewCounted=false; closeEpiPanel(); loadEpisode(); showControls(); }
+        function closeEpiPanel() {
+            document.getElementById('epiOverlay').classList.remove('active');
+            document.getElementById('epiPanel').classList.remove('active');
+        }
 
+        function changeEpi(idx) {
+            currentEpi=idx; viewCounted=false; closeEpiPanel();
+            reloadAdScript(); // Trigger ad
+            loadEpisode(); showControls();
+        }
+
+        // Search
         function openSearch() {
             document.getElementById('searchBox').classList.add('active');
             document.getElementById('searchInput').focus();
@@ -498,6 +581,7 @@
         }
 
         function saveRecent(q){q=q.trim();if(!q)return;recentSearches=recentSearches.filter(s=>s.toLowerCase()!==q.toLowerCase());recentSearches.unshift(q);recentSearches=recentSearches.slice(0,10);localStorage.setItem('ptv_recent',JSON.stringify(recentSearches));}
+
         function renderRecent(){
             if(!recentSearches.length){document.getElementById('recentSection').style.display='none';return;}
             document.getElementById('recentSection').style.display='block';
@@ -508,6 +592,7 @@
         function removeRecent(i){recentSearches.splice(i,1);localStorage.setItem('ptv_recent',JSON.stringify(recentSearches));renderRecent();}
         function clearAllRecent(){recentSearches=[];localStorage.setItem('ptv_recent','[]');renderRecent();}
 
+        // Keyboard
         document.addEventListener('keydown',e=>{
             if(document.getElementById('searchBox').classList.contains('active')){if(e.key==='Escape')closeSearch();return;}
             if(document.getElementById('playerScreen').style.display==='block'){
@@ -530,7 +615,43 @@
             history.pushState(null,null,location.href);
         });
         history.pushState(null,null,location.href);
+let adCounter = 0;
+let nextAfterAd = false;
+let countdownTimer;
+
+function showAdPopup() {
+    document.getElementById("adPopup").style.display = "flex";
+    document.getElementById("countDown").innerText = 10;
+    document.getElementById("skipBtn").style.display = "none";
+
+    let time = 10;
+
+    countdownTimer = setInterval(() => {
+        time--;
+        document.getElementById("countDown").innerText = time;
+
+        if (time <= 0) {
+            clearInterval(countdownTimer);
+            document.getElementById("skipBtn").style.display = "inline-block";
+        }
+    }, 1000);
+
+    const adBox = document.getElementById("nativeAdBox");
+    adBox.innerHTML = `
+        <script async="async" data-cfasync="false" src="https://offevasionrecruit.com/588ef49de657386b09dbcdc02595b9ef/invoke.js"><\/script>
+        <div id="container-588ef49de657386b09dbcdc02595b9ef"></div>
+    `;
+}
+
+function closeAdAndPlay() {
+    document.getElementById("adPopup").style.display = "none";
+
+    if (nextAfterAd) {
+        nextAfterAd = false;
+        nextEpi();
+    }
+}
         loadStories();
     </script>
 </body>
-    </html>
+	</html>
