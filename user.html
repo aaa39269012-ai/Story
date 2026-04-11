@@ -41,17 +41,7 @@
         .ad-bar-top { border-bottom: 1px solid #111; }
         .ad-bar-bottom { border-top: 1px solid #111; }
         .ad-tag { position: absolute; top: 2px; left: 4px; font-size: 0.4rem; color: #222; letter-spacing: 1px; text-transform: uppercase; pointer-events: none; }
-        .ad-inner { width: 320px; height: 50px; overflow: hidden; position: relative; }
-
-        /* ✅ SANDBOX IFRAME - Redirect rok dega */
-        .ad-inner iframe {
-            width: 320px;
-            height: 50px;
-            border: none;
-            display: block;
-            /* sandbox allow-scripts allow-same-origin - popup aur redirect band */
-        }
-
+        .ad-inner { width: 320px; height: 50px; overflow: hidden; }
         .video-wrapper { position: relative; width: 100%; flex: 1; background: #000; overflow: hidden; min-height: 0; }
         #mainVideo { width: 100%; height: 100%; object-fit: contain; display: block; }
         .player-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -203,93 +193,57 @@
     <div class="epi-number-grid" id="epiNumberGrid"></div>
 </div>
 
+<!-- ✅ AD MANAGER -->
 <script>
-// ✅ REDIRECT BLOCKER - Page level pe redirect aur popup band karo
+// Redirect blocker
 (function() {
-    // window.open block karo
-    var originalOpen = window.open;
+    var _open = window.open;
     window.open = function(url, name, specs) {
-        // Sirf allowed origins ke liye allow karo
-        if (url && (url.indexOf(location.hostname) !== -1 || url === '' || url === 'about:blank')) {
-            return originalOpen.call(window, url, name, specs);
+        if (!url || url === '' || url === 'about:blank' || url.indexOf(location.hostname) !== -1) {
+            return _open.call(window, url, name, specs);
         }
-        console.log('Popup blocked:', url);
         return null;
     };
-
-    // location.href redirect block karo
-    var locationDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
-    if (!locationDescriptor || locationDescriptor.configurable) {
-        try {
-            Object.defineProperty(window, 'onbeforeunload', {
-                set: function(fn) {},
-                get: function() { return null; }
-            });
-        } catch(e) {}
-    }
-
-    // Click pe new tab open hone se rokne ke liye
-    document.addEventListener('click', function(e) {
-        var target = e.target;
-        while (target && target !== document) {
-            if (target.tagName === 'A' && target.target === '_blank') {
-                var href = target.getAttribute('href');
-                if (href && href.indexOf(location.hostname) === -1 && href.indexOf('http') === 0) {
-                    // External link - allow but don't redirect current page
-                    return;
-                }
-            }
-            target = target.parentNode;
-        }
-    }, true);
 })();
 
-// ✅ AD LOADER - Sandbox ke saath iframe mein load karo
-function createAdIframe(containerId, delayMs) {
-    setTimeout(function() {
-        var container = document.getElementById(containerId);
-        if (!container) return;
-        container.innerHTML = '';
+var AD_KEY = 'a97d396821d6662ef45a8efcd76329f8';
+var AD_URL = 'https://offevasionrecruit.com/' + AD_KEY + '/invoke.js';
 
-        var iframe = document.createElement('iframe');
-        iframe.width = '320';
-        iframe.height = '50';
-        iframe.scrolling = 'no';
-        iframe.marginWidth = '0';
-        iframe.marginHeight = '0';
-        iframe.style.cssText = 'width:320px;height:50px;border:none;display:block;max-width:100%;';
+// ✅ Ye function ek ad iframe banata hai aur inject karta hai
+function makeAdIframe() {
+    var iframe = document.createElement('iframe');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.style.cssText = 'width:320px;height:50px;border:none;display:block;';
+    iframe.scrolling = 'no';
 
-        // ✅ SANDBOX - Popup aur redirect band, scripts aur same-origin allow
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups-to-escape-sandbox');
+    var html = '<!DOCTYPE html><html><head>'
+        + '<style>*{margin:0;padding:0}body{background:#000;width:320px;height:50px;overflow:hidden;display:flex;align-items:center;justify-content:center}</style>'
+        + '</head><body>'
+        + '<script>var atOptions={"key":"' + AD_KEY + '","format":"iframe","height":50,"width":320,"params":{}}<\/script>'
+        + '<script src="' + AD_URL + '?c=' + Date.now() + '"><\/script>'
+        + '</body></html>';
 
-        container.appendChild(iframe);
-
-        try {
-            var doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write([
-                '<!DOCTYPE html><html><head>',
-                '<meta charset="UTF-8">',
-                '<style>*{margin:0;padding:0;}body{background:#000;width:320px;height:50px;overflow:hidden;display:flex;align-items:center;justify-content:center;}</style>',
-                '</head><body>',
-                '<scr' + 'ipt type="text/javascript">',
-                'var atOptions={"key":"a97d396821d6662ef45a8efcd76329f8","format":"iframe","height":50,"width":320,"params":{}};',
-                '</scr' + 'ipt>',
-                '<scr' + 'ipt type="text/javascript" src="https://offevasionrecruit.com/a97d396821d6662ef45a8efcd76329f8/invoke.js"></scr' + 'ipt>',
-                '</body></html>'
-            ].join(''));
-            doc.close();
-        } catch(e) {
-            console.log('Ad load error:', e);
-        }
-    }, delayMs || 0);
+    iframe.srcdoc = html;
+    return iframe;
 }
 
+// ✅ Ad load function - naya iframe inject karta hai
+function loadAd(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    // Purana clear karo
+    container.innerHTML = '';
+    // Naya iframe add karo
+    container.appendChild(makeAdIframe());
+}
+
+// ✅ Dono ads load karo
 function loadAllAds() {
-    createAdIframe('adTop', 500);      // Top ad - 500ms baad
-    createAdIframe('adBottom', 1200);  // Bottom ad - 1200ms baad (alag time)
+    loadAd('adTop');
+    setTimeout(function() { loadAd('adBottom'); }, 600);
 }
 
+// ✅ Dono ads clear karo
 function clearAllAds() {
     var t = document.getElementById('adTop');
     var b = document.getElementById('adBottom');
@@ -297,8 +251,15 @@ function clearAllAds() {
     if (b) b.innerHTML = '';
 }
 
-window.loadAllAds = loadAllAds;
+// ✅ Sirf ek ad refresh karo (epi change par)
+function refreshAds() {
+    loadAd('adTop');
+    setTimeout(function() { loadAd('adBottom'); }, 600);
+}
+
+window.loadAllAds  = loadAllAds;
 window.clearAllAds = clearAllAds;
+window.refreshAds  = refreshAds;
 </script>
 
 <!-- FIREBASE -->
@@ -455,8 +416,8 @@ window.clearAllAds = clearAllAds;
         buildEpiGrid();
         showOverlay();
         pushState('player');
-        // ✅ Ads load karo player open hone ke baad
-        window.loadAllAds();
+        // ✅ Player open hone par ads load karo
+        setTimeout(() => window.loadAllAds(), 800);
     }
 
     window.handleBackBtn = function() { history.back(); };
@@ -478,11 +439,16 @@ window.clearAllAds = clearAllAds;
         const epi = currentStory.episodes[index];
         const video = document.getElementById('mainVideo');
         document.getElementById('videoLoading').classList.add('show');
-        video.src = epi.url; video.load();
+        video.src = epi.url;
+        video.load();
         video.play().catch(() => {});
         document.getElementById('currentEpiTitle').textContent = `Ep ${index + 1}: ${epi.title}`;
         document.getElementById('playPauseBtn').textContent = '⏸';
         updateEpiGridHighlight();
+
+        // ✅ Har episode change par ads refresh karo
+        window.refreshAds();
+
         clearTimeout(viewTimer);
         if (!viewCounted) {
             viewTimer = setTimeout(() => { countView(); viewCounted = true; }, 10000);
