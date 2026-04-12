@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pawan TV</title>
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0a0a0a; color: #fff; min-height: 100vh; overflow-x: hidden; }
@@ -107,12 +106,14 @@
 </head>
 <body>
 
+<!-- LOADING -->
 <div id="loadingScreen">
     <div class="loading-logo">📺 PAWAN TV</div>
     <div class="loading-bar"><div class="loading-bar-fill"></div></div>
     <div class="loading-text">Loading...</div>
 </div>
 
+<!-- HOME -->
 <div id="homeScreen" style="display:none;">
     <div class="home-header">
         <div class="header-top"><div class="app-logo">📺 PAWAN TV</div></div>
@@ -124,13 +125,16 @@
     <div id="homeContent"></div>
 </div>
 
+<!-- PLAYER -->
 <div id="playerScreen">
 
+    <!-- TOP AD -->
     <div class="ad-bar ad-bar-top">
         <span class="ad-tag">ad</span>
         <div class="ad-inner" id="adTop"></div>
     </div>
 
+    <!-- VIDEO -->
     <div class="video-wrapper" id="videoWrapper">
         <video id="mainVideo" playsinline webkit-playsinline></video>
         <div class="video-loading" id="videoLoading"><div class="spinner"></div></div>
@@ -170,6 +174,7 @@
         </div>
     </div>
 
+    <!-- BOTTOM AD -->
     <div class="ad-bar ad-bar-bottom">
         <span class="ad-tag">ad</span>
         <div class="ad-inner" id="adBottom"></div>
@@ -177,6 +182,7 @@
 
 </div>
 
+<!-- EPISODE PANEL -->
 <div id="epiPanelOverlay" onclick="closeEpiPanelWithHistory()"></div>
 <div id="epiPanel">
     <div class="epi-panel-header">
@@ -186,6 +192,7 @@
     <div class="epi-number-grid" id="epiNumberGrid"></div>
 </div>
 
+<!-- ✅ AD MANAGER -->
 <script>
 // Redirect blocker
 (function() {
@@ -201,6 +208,7 @@
 var AD_KEY = 'a97d396821d6662ef45a8efcd76329f8';
 var AD_URL = 'https://offevasionrecruit.com/' + AD_KEY + '/invoke.js';
 
+// ✅ Ye function ek ad iframe banata hai aur inject karta hai
 function makeAdIframe() {
     var iframe = document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
@@ -218,18 +226,23 @@ function makeAdIframe() {
     return iframe;
 }
 
+// ✅ Ad load function - naya iframe inject karta hai
 function loadAd(containerId) {
     var container = document.getElementById(containerId);
     if (!container) return;
+    // Purana clear karo
     container.innerHTML = '';
+    // Naya iframe add karo
     container.appendChild(makeAdIframe());
 }
 
+// ✅ Dono ads load karo
 function loadAllAds() {
     loadAd('adTop');
     setTimeout(function() { loadAd('adBottom'); }, 600);
 }
 
+// ✅ Dono ads clear karo
 function clearAllAds() {
     var t = document.getElementById('adTop');
     var b = document.getElementById('adBottom');
@@ -237,6 +250,7 @@ function clearAllAds() {
     if (b) b.innerHTML = '';
 }
 
+// ✅ Sirf ek ad refresh karo (epi change par)
 function refreshAds() {
     loadAd('adTop');
     setTimeout(function() { loadAd('adBottom'); }, 600);
@@ -247,6 +261,7 @@ window.clearAllAds = clearAllAds;
 window.refreshAds  = refreshAds;
 </script>
 
+<!-- FIREBASE -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, updateDoc, increment }
@@ -270,17 +285,6 @@ window.refreshAds  = refreshAds;
     let autoNextTimer = null, overlayTimer = null, isOverlayVisible = false;
     let touchStartY = 0, touchStartX = 0;
     let hasLiked = false, viewCounted = false, viewTimer = null;
-
-    // ✅ Adsgram Variables
-    let AdController = null;
-    let epiChangeCounter = 0;
-
-    // ✅ Adsgram Initialize function
-    function initAdsgram() {
-        if (window.Adsgram && !AdController) {
-            AdController = window.Adsgram.init({ blockId: "int-27549" });
-        }
-    }
 
     function pushState(state) { history.pushState({ screen: state }, '', ''); }
 
@@ -397,10 +401,6 @@ window.refreshAds  = refreshAds;
         currentEpiIndex = 0;
         hasLiked = getLikedStatus(currentStoryDocId);
         viewCounted = false;
-        
-        // ✅ Nayi story open hone par counter reset
-        epiChangeCounter = 0; 
-        
         openPlayer();
     };
 
@@ -411,38 +411,13 @@ window.refreshAds  = refreshAds;
         document.getElementById('playerTitle').textContent = currentStory.name;
         document.getElementById('epiCountBadge').textContent = currentStory.episodes.length;
         updateLikeViewUI();
-        
-        // ✅ Direct load karne ki jagah 'playWithAdCheck' use karo
-        playWithAdCheck(currentEpiIndex);
-        
+        loadEpisode(currentEpiIndex);
         buildEpiGrid();
         showOverlay();
         pushState('player');
+        // ✅ Player open hone par ads load karo
         setTimeout(() => window.loadAllAds(), 800);
     }
-
-    // ✅ Naya wrapper function jo har dusre episode pe Adsgram show karega
-    window.playWithAdCheck = function(index) {
-        epiChangeCounter++;
-        initAdsgram(); // Adsgram script verify karo
-        
-        // Har dusre episode par ad show hoga
-        if (epiChangeCounter % 2 === 0 && AdController) {
-            const video = document.getElementById('mainVideo');
-            if (video) video.pause(); // Purani video pause kardo background me
-            
-            AdController.show().then((result) => {
-                // Ad pura dekh liya
-                loadEpisode(index);
-            }).catch((result) => {
-                // Ad skip/close ho gaya ya koi error aaya
-                loadEpisode(index);
-            });
-        } else {
-            // Bina ad ke play karo
-            loadEpisode(index);
-        }
-    };
 
     window.handleBackBtn = function() { history.back(); };
 
@@ -470,6 +445,7 @@ window.refreshAds  = refreshAds;
         document.getElementById('playPauseBtn').textContent = '⏸';
         updateEpiGridHighlight();
 
+        // ✅ Har episode change par ads refresh karo
         window.refreshAds();
 
         clearTimeout(viewTimer);
@@ -543,16 +519,17 @@ window.refreshAds  = refreshAds;
         else { video.pause(); document.getElementById('playPauseBtn').textContent = '▶'; }
     };
 
-    // ✅ Yaha bhi loadEpisode ki jagah 'playWithAdCheck' use kiya
-    window.prevEpisode = function() { if (currentEpiIndex > 0) playWithAdCheck(currentEpiIndex - 1); };
+    window.prevEpisode = function() { if (currentEpiIndex > 0) loadEpisode(currentEpiIndex - 1); };
     window.nextEpisode = function() {
-        if (currentStory && currentEpiIndex < currentStory.episodes.length - 1) playWithAdCheck(currentEpiIndex + 1);
+        if (currentStory && currentEpiIndex < currentStory.episodes.length - 1) loadEpisode(currentEpiIndex + 1);
     };
 
     function startAutoNext() {
-        if (!currentStory || currentEpiIndex >= currentStory.episodes.length - 1) return;
-        window.nextEpisode();
-    }
+    if (!currentStory || currentEpiIndex >= currentStory.episodes.length - 1) return;
+
+    // Direct next episode play (no delay)
+    window.nextEpisode();
+}
 
     window.cancelAutoNext = function() { clearInterval(autoNextTimer); document.getElementById('nextEpiToast').classList.remove('show'); };
     function clearTimers() { clearInterval(autoNextTimer); clearTimeout(overlayTimer); }
@@ -614,8 +591,7 @@ window.refreshAds  = refreshAds;
         document.querySelectorAll('.epi-num-btn').forEach((el, i) => el.classList.toggle('playing', i === currentEpiIndex));
     }
 
-    // ✅ Select karne par bhi playWithAdCheck trigger hoga
-    window.selectEpisode = function(index) { playWithAdCheck(index); history.back(); };
+    window.selectEpisode = function(index) { loadEpisode(index); history.back(); };
 
     window.openEpiPanel = function() {
         buildEpiGrid();
