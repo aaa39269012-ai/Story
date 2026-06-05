@@ -271,8 +271,14 @@
                 <span class="episodes-label">🎬 Episodes</span>
                 <div id="episodesList"></div>
                 <button class="btn-add-epi" onclick="addEpisode()">➕ Add Episode</button>
-                <br>
-                <button class="btn-submit" onclick="saveStory()">💾 Save Story</button>
+
+<button class="btn-submit" onclick="importArchiveEpisodes()">
+📥 Import Archive.org Series
+</button>
+
+<br>
+
+<button class="btn-submit" onclick="saveStory()">💾 Save Story</button>
             </div>
         </div>
 
@@ -628,6 +634,55 @@
         t.className = `toast ${type} show`;
         setTimeout(() => { t.className = 'toast'; }, 3000);
     }
+    window.importArchiveEpisodes = async function() {
+    const archiveUrl = prompt("Archive.org Folder URL daalo");
+
+    if (!archiveUrl) return;
+
+    try {
+        const identifier = archiveUrl.split('/').pop();
+        const res = await fetch(`https://archive.org/metadata/${identifier}`);
+        const data = await res.json();
+
+        const videos = data.files
+    .filter(f => {
+        const name = f.name.toLowerCase();
+
+        return (
+            name.endsWith('.mp4') &&
+            !name.endsWith('.ia.mp4')
+        );
+    })
+    .sort((a, b) =>
+        a.name.localeCompare(
+            b.name,
+            undefined,
+            { numeric: true }
+        )
+    );
+
+        document.getElementById('episodesList').innerHTML = '';
+        episodeCount = 0;
+
+        videos.forEach((video, index) => {
+            addEpisode();
+
+            const item = document.querySelectorAll('#episodesList .episode-item')[index];
+
+            item.querySelector('.epi-title').value =
+                `Episode ${index + 1}`;
+
+            item.querySelector('.epi-url').value =
+                `${archiveUrl}/${video.name}`;
+        });
+
+        showToast(`✅ ${videos.length} Episodes Imported`, 'success');
+
+    } catch (e) {
+        console.error(e);
+        showToast('❌ Import Failed', 'error');
+    }
+};
     window.showToast = showToast;
 </script>
 
